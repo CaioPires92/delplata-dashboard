@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard del Plata - Gestão de Custos e Comercial</title>
+    <meta name="description" content="Dashboard integrado para análise de faturamento, desempenho de canais e simulação de custos operacionais e lavanderia por hóspede.">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Lucide Icons for high-fidelity icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js via CDN for responsive data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div class="header-title">
+                <h1>Dashboard del Plata</h1>
+                <p>Gestão Hoteleira Consolidada: Operacional, Comercial & Margens</p>
+            </div>
+            <div class="badge" id="badge-status">
+                <span class="badge-dot"></span>
+                <span>Dados Sincronizados</span>
+            </div>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <nav class="tabs-nav">
+            <button class="tab-btn active" data-tab="tab-laundry">
+                <i data-lucide="droplet"></i> Lavanderia & Terceirização
+            </button>
+            <button class="tab-btn" data-tab="tab-commercial">
+                <i data-lucide="trending-up"></i> Desempenho Comercial
+            </button>
+            <button class="tab-btn" data-tab="tab-future">
+                <i data-lucide="calendar"></i> Reservas Futuras
+            </button>
+            <button class="tab-btn" data-tab="tab-costs">
+                <i data-lucide="calculator"></i> Custos por Hóspede
+            </button>
+            <button class="tab-btn" data-tab="tab-booking">
+                <i data-lucide="compass"></i> Booking & Concorrência
+            </button>
+            <button class="tab-btn" data-tab="tab-finance-occupancy">
+                <i data-lucide="line-chart"></i> Ocupação & Financeiro
+            </button>
+        </nav>
+
+        <!-- ================= TAB 1: LAUNDRY & OUTSOURCING ================= -->
+        <div id="tab-laundry" class="tab-content active">
+            <!-- KPI Grid -->
+            <div class="dashboard-grid">
+                <div class="card kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span>TOTAL GASTO COM QUÍMICOS</span>
+                        <i data-lucide="wallet"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-total-spent">R$ 0,00</div>
+                    <div class="kpi-trend">
+                        <span>Insumos no período analisado</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span>MÉDIA MENSAL ESTIMADA</span>
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-monthly-avg">R$ 0,00</div>
+                    <div class="kpi-trend positive">
+                        <i data-lucide="zap" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>Projeção ajustada por consumo</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span>CUSTO DIÁRIO PRODUTOS</span>
+                        <i data-lucide="activity"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-daily-cost">R$ 0,00</div>
+                    <div class="kpi-trend">
+                        <span>Média diária de consumo químico</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span>PROJEÇÃO ANUAL</span>
+                        <i data-lucide="calendar"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-annual-proj">R$ 0,00</div>
+                    <div class="kpi-trend">
+                        <span>Gasto projetado para 12 meses</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Charts -->
+            <div class="main-content">
+                <div class="card">
+                    <h2 class="section-title">
+                        <i data-lucide="line-chart"></i>
+                        Evolução Histórica dos Insumos
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="expensesChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2 class="section-title">
+                        <i data-lucide="pie-chart"></i>
+                        Divisão de Químicos por Tipo
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Purchases Table Card -->
+                <div class="card table-card">
+                    <div class="table-header-actions">
+                        <h2 class="section-title" style="margin-bottom: 0;">
+                            <i data-lucide="shopping-cart"></i>
+                            Registro de Compras de Produtos Químicos
+                        </h2>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-secondary" onclick="resetDatabase()">
+                                <i data-lucide="rotate-ccw"></i> Redefinir Dados
+                            </button>
+                            <button class="btn btn-primary" id="btn-add-purchase">
+                                <i data-lucide="plus"></i> Adicionar Compra
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Emissão / Data</th>
+                                    <th>Produto</th>
+                                    <th>Categoria</th>
+                                    <th>Valor</th>
+                                    <th style="text-align: right; width: 80px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchases-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Outsource Simulator -->
+                <div class="card simulator-card">
+                    <h2 class="section-title">
+                        <i data-lucide="calculator"></i>
+                        Simulador de Terceirização
+                    </h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                        Pondere o custo químico com propostas de empresas terceirizadas.
+                    </p>
+                    
+                    <div class="simulator-controls">
+                        <div class="form-group">
+                            <label for="sim-type">Modelo de Cobrança Terceirizada</label>
+                            <select id="sim-type">
+                                <option value="kg">Por Quilo de Roupa (R$/Kg)</option>
+                                <option value="fixed">Mensalidade Fixa Fechada</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label id="sim-value-label" for="sim-value">Preço por kg Terceirizado (R$)</label>
+                            <input type="number" id="sim-value" value="7.50" step="0.10" min="0">
+                        </div>
+
+                        <div class="form-group" id="sim-volume-group">
+                            <label for="sim-volume">Volume de Roupa do Hotel (Kg / Mês)</label>
+                            <input type="number" id="sim-volume" value="250" step="10" min="0">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sim-utility-savings">
+                                Economias Ocultas (R$ / Mês)
+                                <span style="display:block; font-size: 0.72rem; font-weight: normal; color: var(--text-muted); margin-top: 2px;">
+                                    (Água, energia, horas extras e manutenção de maquinários salvos)
+                                </span>
+                            </label>
+                            <input type="number" id="sim-utility-savings" value="350" step="10" min="0">
+                        </div>
+                    </div>
+
+                    <div class="sim-results">
+                        <div class="sim-result-row">
+                            <span class="sim-result-label">Custo Interno Estimado (Insumos + Utilidades):</span>
+                            <span class="sim-result-value" id="sim-result-internal">R$ 0,00</span>
+                        </div>
+                        <div class="sim-result-row">
+                            <span class="sim-result-label">Orçamento da Terceirizada:</span>
+                            <span class="sim-result-value" id="sim-result-external" style="color: var(--color-purple);">R$ 0,00</span>
+                        </div>
+                        <div class="sim-result-row" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem;">
+                            <span class="sim-result-label sim-result-total" id="sim-savings-label">Economia Estimada:</span>
+                            <span class="sim-result-value sim-result-total" id="sim-result-savings">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <div class="comparison-bar-container">
+                        <div class="comp-bar-internal" id="bar-internal"></div>
+                        <div class="comp-bar-external" id="bar-external"></div>
+                    </div>
+                    <div class="comp-legend">
+                        <span class="dot-internal">Lavagem Interna</span>
+                        <span class="dot-external">Terceirização</span>
+                    </div>
+                </div>
+
+                <!-- Qualitative factors -->
+                <div class="card qualitative-card">
+                    <h2 class="section-title">
+                        <i data-lucide="check-square"></i>
+                        Fatores Ocultos na Decisão
+                    </h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                        Pondere estes itens na sua conversa com a proprietária:
+                    </p>
+
+                    <div class="factor-list">
+                        <div class="factor-item warning">
+                            <i data-lucide="clock" class="factor-icon"></i>
+                            <div>
+                                <div class="factor-title">Tempo Operacional de Funcionários</div>
+                                <div class="factor-desc">Lavar e passar consome horas preciosas de sua equipe. Terceirizar libera foco para o atendimento.</div>
+                            </div>
+                        </div>
+
+                        <div class="factor-item info">
+                            <i data-lucide="wrench" class="factor-icon"></i>
+                            <div>
+                                <div class="factor-title">Manutenção e Quebra de Máquinas</div>
+                                <div class="factor-desc">O desgaste constante de rolamentos, resistência e bombas gera um custo imprevisto alto de reparo.</div>
+                            </div>
+                        </div>
+
+                        <div class="factor-item success">
+                            <i data-lucide="shield-check" class="factor-icon"></i>
+                            <div>
+                                <div class="factor-title">Padronização e Reposição</div>
+                                <div class="factor-desc">Empresas terceirizadas garantem lavagem industrial, secagem a vapor que preserva tecidos e cobrem perdas.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: COMMERCIAL PERFORMANCE ================= -->
+        <div id="tab-commercial" class="tab-content">
+            <!-- KPI Grid Comercial -->
+            <div class="dashboard-grid">
+                <div class="card kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span>FATURAMENTO OPERACIONAL</span>
+                        <i data-lucide="dollar-sign"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-comm-revenue">R$ 0,00</div>
+                    <div class="kpi-trend negative">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-9,1% vs Ano Anterior (R$ 435.561,10)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span>DIÁRIAS VENDIDAS</span>
+                        <i data-lucide="key"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-comm-nights">0</div>
+                    <div class="kpi-trend negative">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-20,0% vs Ano Anterior (1.304)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span>VOLUME HÓSPEDES ATENDIDOS</span>
+                        <i data-lucide="users"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-comm-guests">0</div>
+                    <div class="kpi-trend negative">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-17,3% vs Ano Anterior (1.750)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span>DIÁRIA MÉDIA OPERACIONAL (ADR)</span>
+                        <i data-lucide="home"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-comm-adr">R$ 0,00</div>
+                    <div class="kpi-trend positive">
+                        <i data-lucide="trending-up" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>+13,6% vs Ano Anterior (R$ 334,02)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commercial Charts -->
+            <div class="main-content">
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="line-chart"></i>
+                        Receita Mensal de Hospedagens
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="commMonthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="bar-chart-2"></i>
+                        Comparativo por Canal de Venda (2026 vs 2025)
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="commChannelChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Channels Table -->
+                <div class="card table-card" style="grid-column: span 2;">
+                    <h2 class="section-title">
+                        <i data-lucide="bar-chart-2"></i>
+                        Demonstrativo Consolidado por Canal de Venda
+                    </h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Canal de Venda</th>
+                                    <th>Faturamento 2026</th>
+                                    <th>Faturamento 2025</th>
+                                    <th>Crescimento (%)</th>
+                                    <th style="text-align: center;">Diárias 2026</th>
+                                    <th style="text-align: center;">Diárias 2025</th>
+                                    <th>Ticket Médio 2026</th>
+                                    <th>Ticket Médio 2025</th>
+                                </tr>
+                            </thead>
+                            <tbody id="channels-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observação de Receita Adicional -->
+            <div class="card" style="margin-top: 1.5rem; border-left: 4px solid var(--color-cyan); background: rgba(6, 182, 212, 0.04);">
+                <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--color-cyan); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; margin-top: 0;">
+                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+                    Observação de Receita Adicional (Conciliação Operacional)
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    Consta no sistema um volume extra de vendas já realizadas no valor de <strong>R$ 51.266,44</strong>. Para manter a conciliação estrita com os relatórios das planilhas de canais e finanças, este montante foi mantido fora das somas centrais, servindo como ajuste operacional extracontábil.
+                </p>
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: FUTURE RESERVATIONS ================= -->
+        <div id="tab-future" class="tab-content">
+            <!-- KPI Grid Futuro -->
+            <div class="dashboard-grid">
+                <div class="card kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span>RECEITA PREVISTA PROJETADA</span>
+                        <i data-lucide="dollar-sign"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-future-revenue">R$ 0,00</div>
+                    <div class="kpi-trend positive">
+                        <span>Check-ins após 26/05/2026</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span>RESERVAS COMPROMISSADAS</span>
+                        <i data-lucide="calendar-check"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-future-bookings">0</div>
+                    <div class="kpi-trend">
+                        <span>Garantidas no sistema</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span>NOITES (DIÁRIAS FUTURAS)</span>
+                        <i data-lucide="moon"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-future-nights">0</div>
+                    <div class="kpi-trend">
+                        <span>Quartos-noite reservados</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span>DIÁRIA MÉDIA FUTURA (ADR PROJETADO)</span>
+                        <i data-lucide="home"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-future-adr">R$ 0,00</div>
+                    <div class="kpi-trend">
+                        <span>Média de tarifas futuras</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Future Charts -->
+            <div class="main-content">
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="pie-chart"></i>
+                        Divisão de Faturamento Futuro por Canal
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="futureChannelChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="bar-chart-2"></i>
+                        Canais de Venda Futuros
+                    </h2>
+                    <div class="table-wrapper" style="max-height: 290px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Canal</th>
+                                    <th>Faturamento</th>
+                                    <th>Reservas</th>
+                                    <th>Ticket Médio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="future-channels-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Upcoming Stays Table -->
+                <div class="card table-card" style="grid-column: span 2;">
+                    <h2 class="section-title">
+                        <i data-lucide="clock"></i>
+                        Cronograma das Próximas Reservas (Próximos Check-ins)
+                    </h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Hóspede</th>
+                                    <th>Categoria de UH</th>
+                                    <th>Diárias</th>
+                                    <th>Canal de Venda</th>
+                                    <th>Valor Estimado</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="future-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: COSTS PER GUEST & MARGINS ================= -->
+        <div id="tab-costs" class="tab-content">
+            <!-- Cost KPIs -->
+            <div class="dashboard-grid">
+                <div class="card kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span>LAVANDERIA (INSUMOS QUÍMICOS)</span>
+                        <i data-lucide="droplet"></i>
+                    </div>
+                    <div class="kpi-value" style="color: var(--color-blue);">R$ 4,49</div>
+                    <div class="kpi-trend">
+                        <span>Custo real de produtos por hóspede</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span>CAFÉ DA MANHÃ (UNITÁRIO)</span>
+                        <i data-lucide="coffee"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-cost-breakfast" style="color: var(--color-purple);">R$ 18,00</div>
+                    <div class="kpi-trend">
+                        <span>Custo por hóspede / dia</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span>CUSTOS FIXOS RATEADOS</span>
+                        <i data-lucide="layout"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-cost-fixed" style="color: var(--color-cyan);">R$ 0,00</div>
+                    <div class="kpi-trend">
+                        <span>Proporção fixa mensal / hóspede</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span>CUSTO OPERACIONAL TOTAL</span>
+                        <i data-lucide="calculator"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-cost-total-guest" style="color: var(--color-green);">R$ 0,00</div>
+                    <div class="kpi-trend positive">
+                        <span>Custo total estimado por hóspede</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cost Simulator Layout -->
+            <div class="main-content">
+                <!-- Left Panel: Sliders & Inputs -->
+                <div class="card">
+                    <h2 class="section-title">
+                        <i data-lucide="settings"></i>
+                        Parametrizador de Custos Operacionais
+                    </h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
+                        Preencha ou ajuste os valores abaixo para projetar o impacto financeiro de cada serviço na estadia.
+                    </p>
+
+                    <!-- Cost Slider: Breakfast -->
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Café da Manhã (Custo de insumos por hóspede/dia)</span>
+                            <span class="slider-val" id="val-breakfast">R$ 18,00</span>
+                        </div>
+                        <input type="range" id="input-breakfast" min="0" max="60" step="0.50" value="18">
+                    </div>
+
+                    <!-- Cost Slider: Cleaning -->
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Limpeza e Arrumação (Custo médio por quarto/limpeza)</span>
+                            <span class="slider-val" id="val-cleaning">R$ 25,00</span>
+                        </div>
+                        <input type="range" id="input-cleaning" min="0" max="100" step="1.00" value="25">
+                    </div>
+
+                    <!-- Input: Fixed Monthly Costs -->
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="input-fixed-costs">
+                            Despesas Fixas Mensais Rateadas (R$)
+                            <span style="display:block; font-size: 0.72rem; font-weight: normal; color: var(--text-muted); margin-top: 2px;">
+                                (Ex: Energia elétrica geral, internet, sistemas, manutenção geral)
+                            </span>
+                        </label>
+                        <input type="number" id="input-fixed-costs" value="5000" min="0" step="100">
+                    </div>
+
+                    <!-- Input: Channels Commission -->
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span>Comissão Média de Canais (Booking, Expedia, etc. em %)</span>
+                            <span class="slider-val" id="val-commission">15%</span>
+                        </div>
+                        <input type="range" id="input-commission" min="0" max="25" step="0.5" value="15">
+                    </div>
+
+                    <div class="info-note">
+                        <i data-lucide="info"></i>
+                        <span>O custo químico de **Lavanderia** está travado em **R$ 4,49 por hóspede** (baseado no consumo real de químicos apurado na aba 1). Se você terceirizar, o sistema atualizará esta fatia com a taxa da empresa contratada!</span>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Profit Margin Indicator & circular gauge -->
+                <div class="card profit-widget">
+                    <h2 class="section-title" style="align-self: flex-start;">
+                        <i data-lucide="pie-chart"></i>
+                        Margem Operacional Líquida
+                    </h2>
+                    
+                    <div class="gauge-svg-container">
+                        <svg width="160" height="160">
+                            <defs>
+                                <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#3b82f6" />
+                                    <stop offset="100%" stop-color="#10b981" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="gauge-bg" cx="80" cy="80" r="70" />
+                            <circle class="gauge-fill" id="gauge-fill-circle" cx="80" cy="80" r="70" />
+                        </svg>
+                        <div class="gauge-text-overlay">
+                            <span class="gauge-pct" id="gauge-margin-pct">0%</span>
+                            <span class="gauge-lbl">Margem</span>
+                        </div>
+                    </div>
+
+                    <div class="profit-summary-card">
+                        <div class="profit-row">
+                            <span class="profit-lbl">Diária Média Bruta (ADR):</span>
+                            <span class="profit-val" id="profit-adr">R$ 388,57</span>
+                        </div>
+                        <div class="profit-row">
+                            <span class="profit-lbl">(-) Comissão Média do Canal:</span>
+                            <span class="profit-val" id="profit-commission" style="color: var(--color-red);">-R$ 0,00</span>
+                        </div>
+                        <div class="profit-row">
+                            <span class="profit-lbl">(-) Custos Operacionais por Diária:</span>
+                            <span class="profit-val" id="profit-operating-cost" style="color: var(--color-purple);">-R$ 0,00</span>
+                        </div>
+                        <div class="profit-row" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem;">
+                            <span class="profit-lbl" style="font-weight: 700;">(=) Margem de Lucro Diária:</span>
+                            <span class="profit-val-highlight" id="profit-net-value">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: BOOKING & COMPETITION ================= -->
+        <div id="tab-booking" class="tab-content">
+            <!-- KPI Grid Booking -->
+            <div class="dashboard-grid">
+                <div class="card kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span>PESQUISAS NO PERÍODO</span>
+                        <i data-lucide="search"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-bk-searches">1.226.470</div>
+                    <div class="kpi-trend positive">
+                        <i data-lucide="check-circle" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>Melhor do que 93% da cidade</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span>TAXA DE CONVERSÃO</span>
+                        <i data-lucide="funnel"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-bk-conversion">2,22%</div>
+                    <div class="kpi-trend positive">
+                        <i data-lucide="zap" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>Estável vs Ano Anterior (2,22%)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span>RECEITA BRUTA (ESTADIA)</span>
+                        <i data-lucide="dollar-sign"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-bk-revenue">R$ 335.021,44</div>
+                    <div class="kpi-trend positive">
+                        <i data-lucide="trending-up" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>+8,86% vs Ano Anterior (R$ 307.761,07)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span>RANK DE PERFORMANCE</span>
+                        <i data-lucide="trophy"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-bk-rank">1º de 9</div>
+                    <div class="kpi-trend positive">
+                        <span>89% superior aos concorrentes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reflexão Estratégica: Pousada Delplata vs Mercado Regional -->
+            <div class="card" style="margin-bottom: 2rem; border-left: 5px solid var(--color-cyan); background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);">
+                <h2 class="section-title" style="color: var(--color-cyan);">
+                    <i data-lucide="line-chart"></i>
+                    Reflexão Estratégica: Desempenho do Delplata vs Demanda Regional (Serra Negra)
+                </h2>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6;">
+                    Este relatório consolida as inteligências de mercado extraídas dos PDFs da Booking.com (Janeiro a Maio/2026). Os dados provam que <strong>não houve perda de competitividade interna no Delplata</strong>, mas sim uma excelente blindagem tarifária frente a uma forte desaceleração turística na região de Serra Negra.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem;">
+                    <!-- Coluna do Mercado -->
+                    <div style="background: rgba(239, 68, 68, 0.04); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: var(--radius-sm); padding: 1.25rem;">
+                        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--color-red); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <i data-lucide="trending-down"></i>
+                            O Cenário Regional (Retração do Turismo)
+                        </h3>
+                        <ul style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <li>A procura geral por estadias na cidade de Serra Negra <strong>encolheu -13%</strong> nos últimos 365 dias (dados consolidados de mercado).</li>
+                            <li>Esta contração regional afetou o fluxo turístico de todo o município, resultando em menor volume geral de buscas e reservas na cidade.</li>
+                            <li><strong>Retenção Superior:</strong> O Delplata teve queda de apenas <strong>-6,44%</strong> em diárias ocupadas no período, mostrando uma força de retenção muito superior à média da cidade (-13%).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Coluna do Delplata -->
+                    <div style="background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: var(--radius-sm); padding: 1.25rem;">
+                        <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--color-green); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <i data-lucide="trending-up"></i>
+                            A Resiliência do Delplata (Blindagem & Liderança)
+                        </h3>
+                        <ul style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <li><strong>Crescimento de Receita:</strong> Faturamento real de estadias cresceu <strong>+8,86%</strong> (R$ 335.021,44 vs R$ 307.761,07 em 2025) devido ao aumento de <strong>+16,36% no ADR</strong> (R$ 384,64).</li>
+                            <li><strong>Liderança do Ritmo Futuro:</strong> Embora as novas reservas criadas tenham retraído <strong>-18,33% em receita</strong> (R$ 599.573,32 vs R$ 734.134,25), o Delplata é o <strong>1º de 11</strong> em performance futura no grupo concorrente.</li>
+                            <li><strong>Benchmarking Comercial:</strong> Vendemos <strong>+150,63% mais diárias</strong> e faturamos <strong>+152,78% mais</strong> que a média do grupo concorrente direto nos últimos 365 dias.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking Charts & Tables Layout -->
+            <div class="main-content">
+                <!-- Coluna da Esquerda: Tabelas e Gráficos Principais -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; grid-column: span 1;">
+                    <!-- Competitors Table -->
+                    <div class="card table-card" style="width: 100%;">
+                        <h2 class="section-title">
+                            <i data-lucide="users"></i>
+                            Grupo de Concorrentes Diretos (Benchmarking de Nota)
+                        </h2>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                            Sua posição atual dentro do grupo competitivo. Monitoramento nos últimos 90 dias.
+                        </p>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70px; text-align: center;">Posição</th>
+                                        <th>Hotel / Pousada</th>
+                                        <th style="text-align: center;">Avaliação (Nota)</th>
+                                        <th style="text-align: center;">Genius</th>
+                                        <th style="text-align: center;">Preferencial</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bk-competitors-tbody">
+                                    <!-- Injected dynamically via app.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Room Breakdown Table -->
+                    <div class="card table-card" style="width: 100%;">
+                        <h2 class="section-title">
+                            <i data-lucide="bed"></i>
+                            Detalhamento por Quarto (Jan a Mai - Stay Date)
+                        </h2>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Quarto / Plano</th>
+                                        <th style="text-align: center;">Diárias Vendidas</th>
+                                        <th style="text-align: right;">Receita Total (BRL)</th>
+                                        <th style="text-align: right;">Diária Média (ADR)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bk-rooms-tbody">
+                                    <!-- Injected dynamically via app.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Annual Revenue Comparison Chart -->
+                    <div class="card" style="width: 100%;">
+                        <h2 class="section-title">
+                            <i data-lucide="bar-chart-2"></i>
+                            Faturamento de Estadias: 2026 vs 2025
+                        </h2>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                            Comparativo mensal de receita real consumida por estadias (Jan a Mai).
+                        </p>
+                        <div class="chart-container">
+                            <canvas id="bkRevenueComparisonChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Annual Nights Comparison Chart -->
+                    <div class="card" style="width: 100%;">
+                        <h2 class="section-title">
+                            <i data-lucide="moon"></i>
+                            Volume de Diárias Ocupadas: 2026 vs 2025
+                        </h2>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                            Comparativo mensal de diárias vendidas/quartos-noite (Jan a Mai).
+                        </p>
+                        <div class="chart-container">
+                            <canvas id="bkNightsComparisonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna da Direita: Funil de Vendas e Perfil -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem; grid-column: span 1;">
+                    <!-- Funnel Card -->
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i data-lucide="filter"></i>
+                            Funil de Vendas Booking.com
+                        </h2>
+                        <div class="funnel-container" style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                            <div class="funnel-step">
+                                <div class="funnel-step-header">
+                                    <span>1. Pesquisas na Região</span>
+                                    <span class="funnel-step-val">1.226.470</span>
+                                </div>
+                                <div class="funnel-step-bar" style="background: var(--gradient-blue); width: 100%; height: 16px; border-radius: 4px;"></div>
+                            </div>
+                            
+                            <div class="funnel-step" style="padding-left: 10px;">
+                                <div class="funnel-step-header">
+                                    <span>2. Cliques na Página (CTR: 1,76%)</span>
+                                    <span class="funnel-step-val">21.580</span>
+                                </div>
+                                <div class="funnel-step-bar" style="background: var(--gradient-purple); width: 60%; height: 16px; border-radius: 4px;"></div>
+                            </div>
+
+                            <div class="funnel-step" style="padding-left: 20px;">
+                                <div class="funnel-step-header">
+                                    <span>3. Reservas Concluídas (Conv: 2,22%)</span>
+                                    <span class="funnel-step-val">478</span>
+                                </div>
+                                <div class="funnel-step-bar" style="background: var(--gradient-cyan); width: 25%; height: 16px; border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Diagnostic Card -->
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i data-lucide="shield-alert"></i>
+                            Diagnóstico de Qualidade
+                        </h2>
+                        <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+                            <div class="diagnostic-item">
+                                <div style="display: flex; justify-content: space-between; font-weight: 500; font-size: 0.9rem;">
+                                    <span>Cancelamentos</span>
+                                    <span style="color: var(--color-red);">37,1% <span style="font-size: 0.75rem; color: var(--text-muted);">vs 26,7% (Região)</span></span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">A taxa de cancelamento está 10,4% acima da média da cidade. Recomenda-se revisar políticas não reembolsáveis.</div>
+                            </div>
+
+                            <div class="diagnostic-item" style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-weight: 500; font-size: 0.9rem;">
+                                    <span>Nota de Avaliação dos Hóspedes</span>
+                                    <span style="color: var(--color-yellow);">8.6 <span style="font-size: 0.75rem; color: var(--text-muted);">vs 9.3 (Região)</span></span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">A média do set competitivo direto é 9.3. Foque no feedback das avaliações para elevar sua nota.</div>
+                            </div>
+
+                            <div class="diagnostic-item" style="border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                                <div style="display: flex; justify-content: space-between; font-weight: 500; font-size: 0.9rem;">
+                                    <span>Nota do Conteúdo da Página</span>
+                                    <span style="color: var(--color-green);">94% <span style="font-size: 0.75rem; color: var(--text-muted);">vs 88% (Região)</span></span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.15rem;">Sua nota de conteúdo está excelente. Fotos e descrições dos quartos estão muito bem otimizados.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Guest Behavior profile Card -->
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i data-lucide="info"></i>
+                            Comportamento & Perfil de Hóspedes
+                        </h2>
+                        <ul style="font-size: 0.85rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.65rem; padding-left: 1.15rem;">
+                            <li><strong>Perfil de Pesquisa:</strong> Dispositivo móvel (Celular) é amplamente majoritário nas buscas.</li>
+                            <li><strong>Tipo de Viajante:</strong> Casais representam a grande maioria dos interessados.</li>
+                            <li><strong>Objetivo da Viagem:</strong> 78% Lazer, 2% Negócios e 20% Não especificado.</li>
+                            <li><strong>Origem Geográfica:</strong> 98% dos hóspedes residem no Brasil e 2% nos Estados Unidos.</li>
+                            <li><strong>Duração Buscada:</strong> O padrão de busca mais comum é de estadias de <strong>1 diária</strong>.</li>
+                            <li><strong>Janela de Reserva:</strong> A maioria reserva com 8 a 30 dias de antecedência (sendo 18% reservas de última hora de 0 a 1 dia).</li>
+                        </ul>
+                    </div>
+
+                    <!-- Projections Card -->
+                    <div class="card">
+                        <h2 class="section-title">
+                            <i data-lucide="trending-up"></i>
+                            Projeção de Reservas Booking (Jun a Dez/2026)
+                        </h2>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                            Receita e diárias futuras garantidas: <strong>370 diárias</strong> com receita total de <strong>R$ 146.919,50</strong> (ADR de R$ 397,08).
+                        </p>
+                        <div class="chart-container" style="height: 240px;">
+                            <canvas id="bkProjectionsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 6: FINANCE & OCCUPANCY ================= -->
+        <div id="tab-finance-occupancy" class="tab-content">
+            <!-- KPI Grid Financeiro & Ocupação -->
+            <div class="dashboard-grid">
+                <div class="card kpi-card kpi-blue">
+                    <div class="kpi-header">
+                        <span>RECEITA FINANCEIRA REAL</span>
+                        <i data-lucide="dollar-sign"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-fin-revenue">R$ 492.719,27</div>
+                    <div class="kpi-trend negative">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-13,9% vs Ano Anterior (R$ 572.204,40)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-purple">
+                    <div class="kpi-header">
+                        <span>DESPESAS OPERACIONAIS</span>
+                        <i data-lucide="wallet"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-fin-expense">R$ 432.676,23</div>
+                    <div class="kpi-trend positive">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-14,6% vs Ano Anterior (R$ 506.598,66)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-cyan">
+                    <div class="kpi-header">
+                        <span>LUCRO LÍQUIDO REAL</span>
+                        <i data-lucide="trending-up"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-fin-profit">R$ 60.043,04</div>
+                    <div class="kpi-trend negative">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-8,5% vs Ano Anterior (R$ 65.605,74)</span>
+                    </div>
+                </div>
+
+                <div class="card kpi-card kpi-green">
+                    <div class="kpi-header">
+                        <span>TAXA DE OCUPAÇÃO MÉDIA</span>
+                        <i data-lucide="percent"></i>
+                    </div>
+                    <div class="kpi-value" id="kpi-fin-occupancy">28,95%</div>
+                    <div class="kpi-trend negative">
+                        <i data-lucide="trending-down" style="padding: 0; width: 14px; height: 14px;"></i>
+                        <span>-3,79% vs Ano Anterior (32,74%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Charts -->
+            <div class="main-content">
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="bar-chart-2"></i>
+                        Receitas vs Despesas Mensais (2026)
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="finMonthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="line-chart"></i>
+                        Evolução da Taxa de Ocupação (2026 vs 2025)
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="occMonthlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Channel breakdown real -->
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="pie-chart"></i>
+                        Divisão de Faturamento por Canal (Realizado Jan-Mai)
+                    </h2>
+                    <div class="chart-container">
+                        <canvas id="finChannelChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="bar-chart-2"></i>
+                        Canais de Venda Realizados
+                    </h2>
+                    <div class="table-wrapper" style="max-height: 290px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Canal</th>
+                                    <th>Faturamento</th>
+                                    <th>Reservas</th>
+                                    <th>Ticket Médio</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fin-channels-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- DRE side-by-side Table -->
+                <div class="card table-card" style="grid-column: span 2;">
+                    <h2 class="section-title">
+                        <i data-lucide="file-text"></i>
+                        Demonstrativo de Resultados do Exercício (DRE Comparativo) - Jan a Mai
+                    </h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                        Fluxo de caixa realizado consolidado em regime de caixa a partir do sistema financeiro (pago).
+                    </p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Grupo / Categoria DRE</th>
+                                    <th style="text-align: right;">Realizado 2026</th>
+                                    <th style="text-align: right;">Realizado 2025</th>
+                                    <th style="text-align: right;">Diferença Absoluta</th>
+                                    <th style="text-align: center;">Crescimento (%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dre-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Occupancy side-by-side Table -->
+                <div class="card table-card" style="grid-column: span 2;">
+                    <h2 class="section-title">
+                        <i data-lucide="percent"></i>
+                        Detalhamento Comparativo de Ocupação Mensal e Diárias
+                    </h2>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                        Ocupação física real auditada e quartos-noite vendidos no período (Jan a Mai).
+                    </p>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mês / Período</th>
+                                    <th style="text-align: center;">Ocupação 2026 (%)</th>
+                                    <th style="text-align: center;">Diárias Vendidas 2026</th>
+                                    <th style="text-align: center;">Quartos Disponíveis 2026</th>
+                                    <th style="text-align: center;">Ocupação 2025 (%)</th>
+                                    <th style="text-align: center;">Diárias Vendidas 2025</th>
+                                    <th style="text-align: center;">Quartos Disponíveis 2025</th>
+                                    <th style="text-align: center;">Delta Diárias</th>
+                                </tr>
+                            </thead>
+                            <tbody id="occ-table-body">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observação de Receita Adicional -->
+            <div class="card" style="margin-top: 1.5rem; border-left: 4px solid var(--color-cyan); background: rgba(6, 182, 212, 0.04);">
+                <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--color-cyan); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; margin-top: 0;">
+                    <i data-lucide="info" style="width: 16px; height: 16px;"></i>
+                    Observação de Receita Adicional (Conciliação Operacional)
+                </h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
+                    Consta no sistema um volume extra de vendas já realizadas no valor de <strong>R$ 51.266,44</strong>. Para manter a conciliação estrita com os relatórios das planilhas de canais e finanças, este montante foi mantido fora das somas centrais, servindo como ajuste operacional extracontábil.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding Laundry Purchases -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Adicionar Novo Registro de Insumo</h3>
+                <button class="modal-close" id="btn-close-modal">&times;</button>
+            </div>
+            <form id="purchase-form">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="p-name">Nome do Produto</label>
+                    <input type="text" id="p-name" placeholder="Ex: Hidro Soft Blue 50 LT" required>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="p-category">Categoria do Insumo</label>
+                    <select id="p-category" required>
+                        <option value="Amaciante">Amaciante</option>
+                        <option value="Detergente/Sabão">Detergente/Sabão</option>
+                        <option value="Neutralizante/Ácido">Neutralizante/Ácido</option>
+                        <option value="Aditivo">Aditivo</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label for="p-price">Valor Pago (R$)</label>
+                    <input type="number" id="p-price" step="0.01" min="0" placeholder="Ex: 524.81" required>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label for="p-date">Data da Emissão/Compra</label>
+                    <input type="date" id="p-date" required>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar Compra</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="app.js"></script>
+</body>
+</html>
