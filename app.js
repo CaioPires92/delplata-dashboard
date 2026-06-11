@@ -195,16 +195,18 @@ const MGMT_TIMELINE_DATA = [
 ];
 
 const MGMT_CHANNELS_BEFORE = [
-    { channel: 'Booking.com', pct: 85 },
-    { channel: 'WhatsApp / Direto', pct: 15 }
+    { name: 'Booking', value: 60, fill: 'var(--booking)' },
+    { name: 'WhatsApp', value: 35, fill: '#128C7E' },
+    { name: 'Outros (Balcão/Tel)', value: 5, fill: '#9ca3af' }
 ];
 
 const MGMT_CHANNELS_AFTER = [
-    { channel: 'Booking.com', pct: 58 },
-    { channel: 'WhatsApp / Recepção', pct: 22 },
-    { channel: 'Expedia', pct: 9 },
-    { channel: 'Site Próprio (Motor)', pct: 7 },
-    { channel: 'Cobrastur', pct: 4 }
+    { name: 'Booking', value: 65, fill: 'var(--booking)' },
+    { name: 'WhatsApp', value: 19, fill: '#128C7E' },
+    { name: 'Expedia', value: 4, fill: '#000080' },
+    { name: 'Motor Site', value: 3, fill: '#f59e0b' },
+    { name: 'Cobrastur', value: 3, fill: '#8b5cf6' },
+    { name: 'Outros (Balcão/Tel)', value: 6, fill: '#9ca3af' }
 ];
 
 // ==========================================
@@ -1615,10 +1617,10 @@ function renderMgmtChannelsCharts() {
     mgmtChannelsBeforeChart = new Chart(ctxBefore.getContext('2d'), {
         type: 'pie',
         data: {
-            labels: MGMT_CHANNELS_BEFORE.map(c => c.channel),
+            labels: MGMT_CHANNELS_BEFORE.map(c => c.name || c.channel),
             datasets: [{
-                data: MGMT_CHANNELS_BEFORE.map(c => c.pct),
-                backgroundColor: ['#ef4444', '#3b82f6'],
+                data: MGMT_CHANNELS_BEFORE.map(c => c.value || c.pct),
+                backgroundColor: MGMT_CHANNELS_BEFORE.map(c => c.fill) || ['#ef4444', '#3b82f6', '#9ca3af'],
                 borderWidth: 1,
                 borderColor: 'rgba(15,23,42,0.8)'
             }]
@@ -1629,10 +1631,10 @@ function renderMgmtChannelsCharts() {
     mgmtChannelsAfterChart = new Chart(ctxAfter.getContext('2d'), {
         type: 'pie',
         data: {
-            labels: MGMT_CHANNELS_AFTER.map(c => c.channel),
+            labels: MGMT_CHANNELS_AFTER.map(c => c.name || c.channel),
             datasets: [{
-                data: MGMT_CHANNELS_AFTER.map(c => c.pct),
-                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                data: MGMT_CHANNELS_AFTER.map(c => c.value || c.pct),
+                backgroundColor: MGMT_CHANNELS_AFTER.map(c => c.fill) || ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#9ca3af'],
                 borderWidth: 1,
                 borderColor: 'rgba(15,23,42,0.8)'
             }]
