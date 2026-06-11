@@ -1,98 +1,236 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Show loading state
-    const overlay = document.getElementById('loading-overlay');
-    if (overlay) overlay.style.display = 'flex';
+    // Global Chart.js defaults for a clean, premium look
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#6b7280';
+    Chart.defaults.scale.grid.color = '#f3f4f6';
+    Chart.defaults.scale.grid.borderColor = 'transparent';
+    Chart.defaults.plugins.tooltip.backgroundColor = '#111827';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: '600' };
+    Chart.defaults.plugins.tooltip.bodyFont = { size: 13 };
 
-    fetchDashboardData().then(() => {
-        if (overlay) overlay.style.display = 'none';
-        
-        // Populate the top KPIs
-        populateDashboard(hospedinData);
-        
-        // Render simple reservations table
-        renderReservationsTable(hospedinData.reservations);
+    const labels = ['2023', '2024', '2025', '2026'];
+
+    // 1. Evolução das Reservas
+    new Chart(document.getElementById('reservationsChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Reservas',
+                data: [618, 881, 1069, 1009],
+                borderColor: '#2563eb', // blue
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#2563eb',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true, grid: { borderDash: [4, 4] } }
+            }
+        }
+    });
+
+    // 2. Evolução das Vendas
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Vendas Totais (R$)',
+                data: [302611, 445833, 652071, 685112],
+                borderColor: '#10b981', // green
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#10b981',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4] },
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + (value / 1000) + 'k';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 3. Evolução do Ticket Médio
+    new Chart(document.getElementById('adrChart'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ticket Médio (R$)',
+                data: [489, 506, 610, 679],
+                borderColor: '#8b5cf6', // purple
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#8b5cf6',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4] },
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 4. Receita x Despesa
+    new Chart(document.getElementById('dreChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Receita',
+                    data: [310333, 368968, 600626, 599314],
+                    backgroundColor: '#2563eb', // blue
+                    borderRadius: 4
+                },
+                {
+                    label: 'Despesa',
+                    data: [249314, 309076, 543289, 493602],
+                    backgroundColor: '#ef4444', // red
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { usePointStyle: true, boxWidth: 8 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4] },
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + (value / 1000) + 'k';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 5. Resultado Financeiro
+    new Chart(document.getElementById('resultChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Resultado (Lucro)',
+                data: [61020, 59892, 47336, 80712],
+                backgroundColor: [
+                    'rgba(16, 185, 129, 0.5)',
+                    'rgba(16, 185, 129, 0.5)',
+                    'rgba(16, 185, 129, 0.5)',
+                    '#10b981' // 2026 solid highlight
+                ],
+                borderColor: '#10b981',
+                borderWidth: 2,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4] },
+                    ticks: {
+                        callback: function(value) {
+                            return 'R$ ' + (value / 1000) + 'k';
+                        }
+                    }
+                }
+            }
+        }
     });
 });
-
-let hospedinData = {};
-
-async function fetchDashboardData() {
-    try {
-        const response = await fetch('/api/hospedin');
-        const data = await response.json();
-        if (data.success) {
-            hospedinData = data.data;
-        } else {
-            console.warn('API returned success: false, using fallback mock data');
-            loadMockData();
-        }
-    } catch (error) {
-        console.error('Error fetching Hospedin API data:', error);
-        loadMockData();
-    }
-}
-
-function loadMockData() {
-    hospedinData = {
-        occupancy: { rate: 82.5 },
-        adr: { value: 379.50 },
-        revenue: { value: 105200.00 },
-        revpar: { value: 313.08 },
-        reservations: [
-            { guestName: "Carlos Ivan Carius Pereira", status: "Confirmada", checkin: "Hoje", source: "Booking.com" },
-            { guestName: "Fernanda Souza Antonio", status: "Aguardando", checkin: "Hoje", source: "WhatsApp" },
-            { guestName: "Mario Lucio Schumaher", status: "Confirmada", checkin: "Amanhã", source: "Site" },
-            { guestName: "Robson de Lima", status: "Confirmada", checkin: "Amanhã", source: "Recepção" },
-            { guestName: "Ligelison Santos", status: "Aguardando", checkin: "Em 3 dias", source: "Expedia" }
-        ]
-    };
-}
-
-function populateDashboard(data) {
-    if (!data) return;
-    
-    // Occupancy
-    const occEl = document.getElementById('kpi-occupancy');
-    if (occEl && data.occupancy) {
-        occEl.innerText = data.occupancy.rate + '%';
-    }
-    
-    // ADR
-    const adrEl = document.getElementById('kpi-adr');
-    if (adrEl && data.adr) {
-        adrEl.innerText = formatCurrency(data.adr.value);
-    }
-    
-    // Revenue
-    const revEl = document.getElementById('kpi-revenue');
-    if (revEl && data.revenue) {
-        revEl.innerText = formatCurrency(data.revenue.value);
-    }
-    
-    // RevPAR
-    const revparEl = document.getElementById('kpi-revpar');
-    if (revparEl && data.revpar) {
-        revparEl.innerText = formatCurrency(data.revpar.value);
-    }
-}
-
-function renderReservationsTable(reservations) {
-    const tbody = document.getElementById('reservations-tbody');
-    if (!tbody || !reservations) return;
-    
-    tbody.innerHTML = '';
-    reservations.forEach(res => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${res.guestName}</td>
-            <td><span class="status-badge ${res.status === 'Confirmada' ? 'success' : 'warning'}">${res.status}</span></td>
-            <td>${res.checkin}</td>
-            <td>${res.source}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function formatCurrency(value) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
