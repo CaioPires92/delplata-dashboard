@@ -176,38 +176,22 @@ const DRE_EXPENSES = [
 // ==========================================
 
 const MGMT_TIMELINE_DATA = [
-    { month: 'Jan/24', revenue: 45000 },
-    { month: 'Fev/24', revenue: 42000 },
-    { month: 'Mar/24', revenue: 38000 },
-    { month: 'Abr/24', revenue: 40000 },
-    // Caio enters in May 2024
-    { month: 'Mai/24', revenue: 55000 },
-    { month: 'Jun/24', revenue: 62000 },
-    { month: 'Jul/24', revenue: 78000 },
-    { month: 'Ago/24', revenue: 72000 },
-    { month: 'Set/24', revenue: 69000 },
-    { month: 'Out/24', revenue: 75000 },
-    { month: 'Nov/24', revenue: 82000 },
-    { month: 'Dez/24', revenue: 95000 },
-    { month: 'Jan/25', revenue: 102000 },
-    { month: 'Fev/25', revenue: 88000 },
-    { month: 'Mar/25', revenue: 85000 },
-    { month: 'Abr/25', revenue: 90000 },
-    { month: 'Mai/25', revenue: 87000 },
-    { month: 'Jun/25', revenue: 92000 },
-    { month: 'Jul/25', revenue: 105000 },
+    { month: 'Abr/25', revenue: 35000.44 },
+    { month: 'Mai/25', revenue: 73240.48 },
+    { month: 'Jun/25', revenue: 100451.48 },
+    { month: 'Jul/25', revenue: 122243.06 },
     // Caio leaves in August 2025 (The GAP)
-    { month: 'Ago/25', revenue: 42000 },
-    { month: 'Set/25', revenue: 35000 },
+    { month: 'Ago/25', revenue: 72188.11 },
+    { month: 'Set/25', revenue: 78166.41 },
     // Caio returns in October 2025
-    { month: 'Out/25', revenue: 89000 },
-    { month: 'Nov/25', revenue: 110000 },
-    { month: 'Dez/25', revenue: 135000 },
-    { month: 'Jan/26', revenue: 140000 },
-    { month: 'Fev/26', revenue: 125000 },
-    { month: 'Mar/26', revenue: 118000 },
-    { month: 'Abr/26', revenue: 122000 },
-    { month: 'Mai/26', revenue: 115000 }
+    { month: 'Out/25', revenue: 92045.84 },
+    { month: 'Nov/25', revenue: 115014.93 },
+    { month: 'Dez/25', revenue: 187359.10 },
+    { month: 'Jan/26', revenue: 126881.20 },
+    { month: 'Fev/26', revenue: 92969.74 },
+    { month: 'Mar/26', revenue: 82813.34 },
+    { month: 'Abr/26', revenue: 110562.86 },
+    { month: 'Mai/26', revenue: 85258.68 }
 ];
 
 const MGMT_CHANNELS_BEFORE = [
