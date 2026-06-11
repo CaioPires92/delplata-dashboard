@@ -174,9 +174,52 @@ let DRE_EXPENSES = {
     ]
 };
 
-// ==========================================
-// 1b. MOCK DATA FOR MANAGEMENT IMPACT (FATOR CAIO)
-// ==========================================
+// --- COMPARATIVE DATA (2023 - 2026) ---
+
+const REV_EXP_COMPARISON = [
+  { month: "Jan", rev23: 32363, exp23: 55070, rev24: 72286, exp24: 60798, rev25: 121886, exp25: 109780, rev26: 131664, exp26: 99918 },
+  { month: "Fev", rev23: 56408, exp23: 44261, rev24: 60905, exp24: 65375, rev25: 95743, exp25: 117546, rev26: 95003, exp26: 110244 },
+  { month: "Mar", rev23: 30032, exp23: 43652, rev24: 48405, exp24: 55774, rev25: 102397, exp25: 88146, rev26: 85752, exp26: 74172 },
+  { month: "Abr", rev23: 81004, exp23: 43502, rev24: 41470, exp24: 56500, rev25: 116611, exp25: 97570, rev26: 112313, exp26: 64541 },
+  { month: "Mai", rev23: 34094, exp23: 46742, rev24: 88632, exp24: 47490, rev25: 105647, exp25: 93555, rev26: 86415, exp26: 83799 },
+  { month: "Jun", rev23: 65283, exp23: 59420, rev24: 72170, exp24: 65989, rev25: 118986, exp25: 86234, rev26: 116685, exp26: 11693 },
+  { month: "Jul", rev23: 96102, exp23: 41477, rev24: 138783, exp24: 92467, rev25: 140498, exp25: 87905, rev26: 89316, exp26: 0 },
+  { month: "Ago", rev23: 31712, exp23: 54237, rev24: 89395, exp24: 103080, rev25: 75860, exp25: 106104, rev26: 23948, exp26: 0 },
+  { month: "Set", rev23: 62966, exp23: 57421, rev24: 83532, exp24: 104278, rev25: 79783, exp25: 75361, rev26: 11095, exp26: 0 },
+  { month: "Out", rev23: 36075, exp23: 52842, rev24: 81089, exp24: 108104, rev25: 94043, exp25: 81859, rev26: 15352, exp26: 0 },
+  { month: "Nov", rev23: 51754, exp23: 46457, rev24: 97429, exp24: 96422, rev25: 117860, exp25: 94298, rev26: 4854, exp26: 0 },
+  { month: "Dez", rev23: 102186, exp23: 62767, rev24: 128812, exp24: 141044, rev25: 197476, exp25: 111218, rev26: 21883, exp26: 0 }
+];
+
+const NIGHTS_COMPARISON = [
+  { month: "Jan", n23: 138, n24: 243, n25: 367, n26: 362 },
+  { month: "Fev", n23: 170, n24: 162, n25: 269, n26: 221 },
+  { month: "Mar", n23: 123, n24: 160, n25: 292, n26: 242 },
+  { month: "Abr", n23: 237, n24: 143, n25: 330, n26: 274 },
+  { month: "Mai", n23: 144, n24: 305, n25: 331, n26: 226 },
+  { month: "Jun", n23: 216, n24: 291, n25: 318, n26: 312 },
+  { month: "Jul", n23: 343, n24: 445, n25: 396, n26: 238 },
+  { month: "Ago", n23: 123, n24: 338, n25: 237, n26: 66 },
+  { month: "Set", n23: 204, n24: 343, n25: 259, n26: 28 },
+  { month: "Out", n23: 111, n24: 328, n25: 316, n26: 57 },
+  { month: "Nov", n23: 180, n24: 324, n25: 354, n26: 13 },
+  { month: "Dez", n23: 262, n24: 351, n25: 470, n26: 47 }
+];
+
+const CATEGORY_CHART_DATA = [
+  { room: "Aptos Superiores", revenue: 1332828 },
+  { room: "Aptos térreos", revenue: 1236832 },
+  { room: "Chalés", revenue: 767422 },
+  { room: "Apto Anexo", revenue: 423878 },
+  { room: "Chalés Antigos", revenue: 83022 }
+];
+
+const CHANNELS_BY_YEAR = {
+  "2023": { "WhatsApp": 300143, "Recepção": 19424, "Telefone": 52802, "Booking": 296792, "Outro": 10338 },
+  "2024": { "WhatsApp": 342124, "Recepção": 27795, "Telefone": 52470, "Booking": 574559, "Outro": 4852 },
+  "2025": { "WhatsApp": 482913, "Recepção": 27353, "Telefone": 34949, "Booking": 810654, "Outro": 9831 },
+  "2026": { "Booking": 532311, "WhatsApp": 153645, "Recepção": 27317, "Site": 24235, "Expedia": 27457, "Cobrastur": 17340 }
+};
 
 const MGMT_TIMELINE_DATA = [
     { month: 'Jan/23', revenue: 32363.09 },
@@ -542,12 +585,12 @@ function renderLaundryCharts() {
     categoryChart = new Chart(ctxCategory, {
         type: 'doughnut',
         data: {
-            labels: catLabels,
+            labels: CATEGORY_CHART_DATA.map(d => d.room),
             datasets: [{
-                data: catValues,
-                backgroundColor: catColors.slice(0, catLabels.length),
+                data: CATEGORY_CHART_DATA.map(d => d.revenue),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b'],
                 borderWidth: 1,
-                borderColor: 'rgba(15, 23, 42, 0.8)'
+                borderColor: 'rgba(15,23,42,0.8)'
             }]
         },
         options: {
@@ -737,7 +780,7 @@ function renderCommercialCharts() {
     });
 
     // Horizontal grouped bar chart for top channels compared to 2025
-    const sortedChannels = [...CHANNELS_DATA]
+    const sortedChannels = [...CHANNELS_BY_YEAR]
         .filter(c => c.revenue26 > 0 || c.revenue25 > 0)
         .sort((a, b) => b.revenue26 - a.revenue26);
         
@@ -1371,32 +1414,43 @@ function renderFinanceCharts() {
 
     if (!ctxFin || !ctxOcc) return;
 
-    const labels = FINANCIAL_MONTHLY_2026.map(item => item.month);
-    const revs = FINANCIAL_MONTHLY_2026.map(item => item.revenue);
-    const exps = FINANCIAL_MONTHLY_2026.map(item => item.expense);
+    const labels = REV_EXP_COMPARISON.map(d => d.month);
 
     if (finMonthlyChart) finMonthlyChart.destroy();
 
     finMonthlyChart = new Chart(ctxFin.getContext('2d'), {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: labels,
             datasets: [
                 {
-                    label: 'Receitas Realizadas',
-                    data: revs,
-                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
-                    borderColor: '#10b981',
-                    borderWidth: 1.5,
-                    borderRadius: 4
+                    label: 'Receitas 2023 (R$)',
+                    data: REV_EXP_COMPARISON.map(d => d.rev23),
+                    borderColor: '#9ca3af',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2,
+                    borderDash: [5, 5]
                 },
                 {
-                    label: 'Despesas Realizadas',
-                    data: exps,
-                    backgroundColor: 'rgba(239, 68, 68, 0.8)',
-                    borderColor: '#ef4444',
-                    borderWidth: 1.5,
-                    borderRadius: 4
+                    label: 'Receitas 2024 (R$)',
+                    data: REV_EXP_COMPARISON.map(d => d.rev24),
+                    borderColor: '#64748b',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Receitas 2025 (R$)',
+                    data: REV_EXP_COMPARISON.map(d => d.rev25),
+                    borderColor: '#10b981',
+                    backgroundColor: 'transparent',
+                    borderWidth: 2
+                },
+                {
+                    label: 'Receitas 2026 (R$)',
+                    data: REV_EXP_COMPARISON.map(d => d.rev26),
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'transparent',
+                    borderWidth: 3
                 }
             ]
         },
@@ -1423,9 +1477,7 @@ function renderFinanceCharts() {
         }
     });
 
-    const labelsOcc = OCCUPANCY_2026.map(item => item.period.split('/')[0]);
-    const dataOcc26 = OCCUPANCY_2026.map(item => item.occupancy);
-    const dataOcc25 = OCCUPANCY_2025.map(item => item.occupancy);
+    const labelsOcc = NIGHTS_COMPARISON.map(d => d.month);
 
     if (occMonthlyChart) occMonthlyChart.destroy();
 
@@ -1435,29 +1487,36 @@ function renderFinanceCharts() {
             labels: labelsOcc,
             datasets: [
                 {
-                    label: 'Ocupação 2026 (%)',
-                    data: dataOcc26,
-                    borderColor: '#06b6d4',
-                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#06b6d4',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 6
+                    label: 'Diárias Vendidas (2023)',
+                    data: NIGHTS_COMPARISON.map(d => d.n23),
+                    borderColor: '#64748b',
+                    backgroundColor: '#64748b',
+                    borderWidth: 2,
+                    tension: 0.3
                 },
                 {
-                    label: 'Ocupação 2025 (%)',
-                    data: dataOcc25,
-                    borderColor: '#94a3b8',
-                    backgroundColor: 'transparent',
-                    borderWidth: 2.5,
-                    borderDash: [5, 5],
-                    fill: false,
-                    tension: 0.4,
-                    pointBackgroundColor: '#94a3b8',
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 4
+                    label: 'Diárias Vendidas (2024)',
+                    data: NIGHTS_COMPARISON.map(d => d.n24),
+                    borderColor: '#f59e0b',
+                    backgroundColor: '#f59e0b',
+                    borderWidth: 2,
+                    tension: 0.3
+                },
+                {
+                    label: 'Diárias Vendidas (2025)',
+                    data: NIGHTS_COMPARISON.map(d => d.n25),
+                    borderColor: '#10b981',
+                    backgroundColor: '#10b981',
+                    borderWidth: 2,
+                    tension: 0.3
+                },
+                {
+                    label: 'Diárias Vendidas (2026)',
+                    data: NIGHTS_COMPARISON.map(d => d.n26),
+                    borderColor: '#3b82f6',
+                    backgroundColor: '#3b82f6',
+                    borderWidth: 3,
+                    tension: 0.3
                 }
             ]
         },
