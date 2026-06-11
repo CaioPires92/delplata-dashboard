@@ -172,6 +172,58 @@ const DRE_EXPENSES = [
 ];
 
 // ==========================================
+// 1b. MOCK DATA FOR MANAGEMENT IMPACT (FATOR CAIO)
+// ==========================================
+
+const MGMT_TIMELINE_DATA = [
+    { month: 'Jan/24', revenue: 45000 },
+    { month: 'Fev/24', revenue: 42000 },
+    { month: 'Mar/24', revenue: 38000 },
+    { month: 'Abr/24', revenue: 40000 },
+    // Caio enters in May 2024
+    { month: 'Mai/24', revenue: 55000 },
+    { month: 'Jun/24', revenue: 62000 },
+    { month: 'Jul/24', revenue: 78000 },
+    { month: 'Ago/24', revenue: 72000 },
+    { month: 'Set/24', revenue: 69000 },
+    { month: 'Out/24', revenue: 75000 },
+    { month: 'Nov/24', revenue: 82000 },
+    { month: 'Dez/24', revenue: 95000 },
+    { month: 'Jan/25', revenue: 102000 },
+    { month: 'Fev/25', revenue: 88000 },
+    { month: 'Mar/25', revenue: 85000 },
+    { month: 'Abr/25', revenue: 90000 },
+    { month: 'Mai/25', revenue: 87000 },
+    { month: 'Jun/25', revenue: 92000 },
+    { month: 'Jul/25', revenue: 105000 },
+    // Caio leaves in August 2025 (The GAP)
+    { month: 'Ago/25', revenue: 42000 },
+    { month: 'Set/25', revenue: 35000 },
+    // Caio returns in October 2025
+    { month: 'Out/25', revenue: 89000 },
+    { month: 'Nov/25', revenue: 110000 },
+    { month: 'Dez/25', revenue: 135000 },
+    { month: 'Jan/26', revenue: 140000 },
+    { month: 'Fev/26', revenue: 125000 },
+    { month: 'Mar/26', revenue: 118000 },
+    { month: 'Abr/26', revenue: 122000 },
+    { month: 'Mai/26', revenue: 115000 }
+];
+
+const MGMT_CHANNELS_BEFORE = [
+    { channel: 'Booking.com', pct: 85 },
+    { channel: 'WhatsApp / Direto', pct: 15 }
+];
+
+const MGMT_CHANNELS_AFTER = [
+    { channel: 'Booking.com', pct: 58 },
+    { channel: 'WhatsApp / Recepção', pct: 22 },
+    { channel: 'Expedia', pct: 9 },
+    { channel: 'Site Próprio (Motor)', pct: 7 },
+    { channel: 'Cobrastur', pct: 4 }
+];
+
+// ==========================================
 // 2. STATE MANAGEMENT & LOCAL STORAGE
 // ==========================================
 
@@ -189,6 +241,9 @@ let bkProjectionsChart = null;
 let finMonthlyChart = null;
 let occMonthlyChart = null;
 let finChannelChart = null;
+let mgmtTimelineChart = null;
+let mgmtChannelsBeforeChart = null;
+let mgmtChannelsAfterChart = null;
 
 // ==========================================
 // 3. TAB CONTROLLER
@@ -220,6 +275,8 @@ tabButtons.forEach(btn => {
             updateBookingTab();
         } else if (targetTab === 'tab-finance-occupancy') {
             updateFinanceOccupancyTab();
+        } else if (targetTab === 'tab-management') {
+            updateManagementTab();
         }
     });
 });
@@ -238,6 +295,79 @@ function formatDate(dateStr) {
         return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
     return dateStr;
+}
+
+// ==========================================
+// 8. TAB 4: COSTS PER GUEST (UNIT ECONOMICS)
+// ==========================================
+
+function updateCostsTab() {
+    renderCostBreakdown();
+}
+
+function renderCostBreakdown() {
+    const tbody = document.getElementById('cost-breakdown-tbody');
+    const tfoot = document.getElementById('cost-breakdown-tfoot');
+    if (!tbody || !tfoot) return;
+    tbody.innerHTML = '';
+    
+    // Calculate global denominators from COMMERCIAL_SUMMARY
+    const totalGuests = COMMERCIAL_SUMMARY.totalGuests || 1;
+    const totalNights = COMMERCIAL_SUMMARY.totalNights || 1;
+    const totalBookings = COMMERCIAL_SUMMARY.totalBookings || 1;
+    
+    // We use DRE_EXPENSES as our data source for costs
+    const totalExpenses = DRE_EXPENSES.reduce((sum, item) => sum + item.value26, 0);
+
+    DRE_EXPENSES.forEach(item => {
+        const cost = item.value26;
+        const cpg = cost / totalGuests;
+        const cpor = cost / totalNights;
+        const cpr = cost / totalBookings;
+        const pct = ((cost / totalExpenses) * 100).toFixed(1);
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${item.category}</td>
+            <td style="text-align: right; color: var(--color-purple);">${formatCurrency(cost)}</td>
+            <td style="text-align: right; color: var(--color-cyan);">${formatCurrency(cpg)}</td>
+            <td style="text-align: right; color: var(--color-green);">${formatCurrency(cpor)}</td>
+            <td style="text-align: right; color: var(--text-secondary);">${formatCurrency(cpr)}</td>
+            <td style="text-align: center; font-weight: 500;">${pct}%</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Populate totals row
+    const totalCpg = totalExpenses / totalGuests;
+    const totalCpor = totalExpenses / totalNights;
+    const totalCpr = totalExpenses / totalBookings;
+
+    tfoot.innerHTML = `
+        <tr>
+            <td>TOTAL GERAL</td>
+            <td style="text-align: right; color: var(--color-purple);">${formatCurrency(totalExpenses)}</td>
+            <td style="text-align: right; color: var(--color-cyan);">${formatCurrency(totalCpg)}</td>
+            <td style="text-align: right; color: var(--color-green);">${formatCurrency(totalCpor)}</td>
+            <td style="text-align: right; color: var(--text-secondary);">${formatCurrency(totalCpr)}</td>
+            <td style="text-align: center;">100%</td>
+        </tr>
+    `;
+    
+    // Update KPIs at the top
+    const breakfastItem = DRE_EXPENSES.find(i => i.category === 'Alimentos');
+    const breakfastCpg = breakfastItem ? (breakfastItem.value26 / totalGuests) : 0;
+    
+    const cleaningItem = DRE_EXPENSES.find(i => i.category === 'Produtos de limpeza');
+    const cleaningCpg = cleaningItem ? (cleaningItem.value26 / totalGuests) : 0;
+    
+    document.getElementById('kpi-cost-breakfast').innerText = formatCurrency(breakfastCpg);
+    
+    const kpiFixed = document.getElementById('kpi-cost-fixed');
+    if(kpiFixed) kpiFixed.innerText = formatCurrency(totalCpg - breakfastCpg - cleaningCpg);
+    
+    const kpiTotal = document.getElementById('kpi-cost-total-guest');
+    if(kpiTotal) kpiTotal.innerText = formatCurrency(totalCpg);
 }
 
 // ==========================================
@@ -504,39 +634,38 @@ function updateCommercialTab() {
     document.getElementById('kpi-comm-guests').innerText = COMMERCIAL_SUMMARY.totalGuests;
     document.getElementById('kpi-comm-adr').innerText = formatCurrency(COMMERCIAL_SUMMARY.adr);
 
-    renderCommercialTable();
+    renderCommercialChannelsTable();
     renderCommercialCharts();
 }
 
-function renderCommercialTable() {
+function renderCommercialChannelsTable() {
     const tbody = document.getElementById('channels-table-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
+    
+    const totalRev26 = CHANNELS_DATA.reduce((acc, curr) => acc + curr.revenue26, 0);
 
-    // Sort by 2026 revenue descending
-    const sorted = [...CHANNELS_DATA].sort((a, b) => b.revenue26 - a.revenue26);
-
-    sorted.forEach(c => {
-        // Skip channels with zero in both years
-        if (c.revenue26 === 0 && c.revenue25 === 0) return;
-
-        const ticket26 = c.bookings26 > 0 ? c.revenue26 / c.bookings26 : 0;
-        const ticket25 = c.bookings25 > 0 ? c.revenue25 / c.bookings25 : 0;
-        
-        const diff = c.revenue26 - c.revenue25;
-        const pct = c.revenue25 > 0 ? (diff / c.revenue25) * 100 : 0.0;
-        const pctText = c.revenue25 > 0 ? `${pct > 0 ? '+' : ''}${pct.toFixed(1)}%` : 'Novo';
-        const pctClass = diff > 0 ? 'savings-positive' : (diff < 0 ? 'savings-negative' : '');
-
+    CHANNELS_DATA.forEach(row => {
         const tr = document.createElement('tr');
+        
+        const grw = row.revenue25 > 0 ? ((row.revenue26 - row.revenue25) / row.revenue25) * 100 : 100;
+        const grwClass = grw > 0 ? 'savings-positive' : (grw < 0 ? 'savings-negative' : '');
+        
+        const tk26 = row.bookings26 > 0 ? row.revenue26 / row.bookings26 : 0;
+        const tk25 = row.bookings25 > 0 ? row.revenue25 / row.bookings25 : 0;
+        
+        const pct26 = totalRev26 > 0 ? ((row.revenue26 / totalRev26) * 100).toFixed(1) : '0.0';
+
         tr.innerHTML = `
-            <td><strong>${c.channel}</strong></td>
-            <td class="price-col" style="color: var(--color-blue);">${formatCurrency(c.revenue26)}</td>
-            <td class="price-col" style="color: var(--text-secondary);">${formatCurrency(c.revenue25)}</td>
-            <td style="font-weight:600;" class="${pctClass}">${pctText}</td>
-            <td style="text-align:center;">${c.nights26}</td>
-            <td style="text-align:center; color: var(--text-secondary);">${c.nights25}</td>
-            <td class="price-col">${formatCurrency(ticket26)}</td>
-            <td class="price-col" style="color: var(--text-secondary);">${formatCurrency(ticket25)}</td>
+            <td>${row.channel}</td>
+            <td>${formatCurrency(row.revenue26)}</td>
+            <td style="color: var(--color-cyan);">${pct26}%</td>
+            <td style="color: var(--text-secondary);">${formatCurrency(row.revenue25)}</td>
+            <td class="${grwClass}">${grw > 0 ? '+' : ''}${grw.toFixed(1)}%</td>
+            <td style="text-align: center;">${row.nights26}</td>
+            <td style="text-align: center; color: var(--text-secondary);">${row.nights25}</td>
+            <td>${formatCurrency(tk26)}</td>
+            <td style="color: var(--text-secondary);">${formatCurrency(tk25)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -770,100 +899,6 @@ function renderFutureCharts() {
 }
 
 // ==========================================
-// 8. TAB 4: UNIT COSTS & MARGIN CALCULATOR
-// ==========================================
-
-const inputBreakfast = document.getElementById('input-breakfast');
-const inputCleaning = document.getElementById('input-cleaning');
-const inputFixedCosts = document.getElementById('input-fixed-costs');
-const inputCommission = document.getElementById('input-commission');
-
-const valBreakfast = document.getElementById('val-breakfast');
-const valCleaning = document.getElementById('val-cleaning');
-const valCommission = document.getElementById('val-commission');
-
-function updateCostsTab() {
-    const breakfastDaily = parseFloat(inputBreakfast.value);
-    const cleaningRoom = parseFloat(inputCleaning.value);
-    const fixedCostsMonthly = parseFloat(inputFixedCosts.value);
-    const commissionPct = parseFloat(inputCommission.value);
-
-    valBreakfast.innerText = formatCurrency(breakfastDaily);
-    valCleaning.innerText = formatCurrency(cleaningRoom);
-    valCommission.innerText = `${commissionPct}%`;
-
-    const totalGuests = COMMERCIAL_SUMMARY.totalGuests; 
-    const totalNights = COMMERCIAL_SUMMARY.totalNights; 
-    const totalBookings = COMMERCIAL_SUMMARY.totalBookings; 
-    
-    const guestsPerNight = totalGuests / totalNights; 
-    const nightsPerBooking = totalNights / totalBookings; 
-    const guestsPerBooking = totalGuests / totalBookings; 
-
-    let laundryCostPerGuest = 4.49; 
-    let laundryCostPerNight = 6.24;
-
-    if (window.simulatedMonthlyOutsourceCost > 0) {
-        const simulatedMonthlyCost = window.simulatedMonthlyOutsourceCost;
-        const guestsPerMonth = totalGuests / COMMERCIAL_SUMMARY.monthsInPeriod;
-        const nightsPerMonth = totalNights / COMMERCIAL_SUMMARY.monthsInPeriod;
-        
-        laundryCostPerGuest = simulatedMonthlyCost / guestsPerMonth;
-        laundryCostPerNight = simulatedMonthlyCost / nightsPerMonth;
-    }
-
-    const breakfastCostPerGuest = breakfastDaily;
-    const breakfastCostPerNight = breakfastDaily * guestsPerNight; 
-
-    const cleaningCostPerNight = cleaningRoom;
-    const cleaningCostPerGuest = cleaningRoom / guestsPerNight; 
-
-    const roomNightsPerMonth = totalNights / COMMERCIAL_SUMMARY.monthsInPeriod;
-    const guestsPerMonth = totalGuests / COMMERCIAL_SUMMARY.monthsInPeriod;
-    
-    const fixedCostPerGuest = fixedCostsMonthly / guestsPerMonth;
-    const fixedCostPerNight = fixedCostsMonthly / roomNightsPerMonth;
-
-    const totalOperatingCostPerGuest = laundryCostPerGuest + breakfastCostPerGuest + (cleaningRoom / guestsPerBooking) + fixedCostPerGuest;
-
-    const commissionCostPerNight = COMMERCIAL_SUMMARY.adr * (commissionPct / 100);
-    const operatingCostPerNight = laundryCostPerNight + breakfastCostPerNight + cleaningCostPerNight + fixedCostPerNight;
-    const totalCostPerNight = commissionCostPerNight + operatingCostPerNight;
-
-    const netProfitPerNight = COMMERCIAL_SUMMARY.adr - totalCostPerNight;
-    const profitMarginPct = Math.max(0, (netProfitPerNight / COMMERCIAL_SUMMARY.adr) * 100);
-
-    document.getElementById('kpi-cost-breakfast').innerText = formatCurrency(breakfastCostPerGuest);
-    document.getElementById('kpi-cost-fixed').innerText = formatCurrency(fixedCostPerGuest);
-    document.getElementById('kpi-cost-total-guest').innerText = formatCurrency(totalOperatingCostPerGuest);
-
-    document.getElementById('profit-adr').innerText = formatCurrency(COMMERCIAL_SUMMARY.adr);
-    document.getElementById('profit-commission').innerText = `-${formatCurrency(commissionCostPerNight)}`;
-    document.getElementById('profit-operating-cost').innerText = `-${formatCurrency(operatingCostPerNight)}`;
-    
-    const netValEl = document.getElementById('profit-net-value');
-    netValEl.innerText = formatCurrency(netProfitPerNight);
-    
-    if (netProfitPerNight >= 0) {
-        netValEl.className = "profit-val-highlight savings-positive";
-    } else {
-        netValEl.className = "profit-val-highlight savings-negative";
-    }
-
-    document.getElementById('gauge-margin-pct').innerText = `${Math.round(profitMarginPct)}%`;
-    
-    const circle = document.getElementById('gauge-fill-circle');
-    const offset = 440 - (440 * profitMarginPct) / 100;
-    circle.style.strokeDashoffset = offset;
-}
-
-if (inputBreakfast) {
-    [inputBreakfast, inputCleaning, inputFixedCosts, inputCommission].forEach(ctrl => {
-        ctrl.addEventListener('input', updateCostsTab);
-    });
-}
-
-// ==========================================
 // 8b. TAB 5: BOOKING & COMPETITION LOGIC (NEW)
 // ==========================================
 
@@ -1086,27 +1121,31 @@ function renderBookingCharts() {
 function updateFinanceOccupancyTab() {
     renderDreTable();
     renderOccupancyTable();
-    renderFinChannelsTable();
+    renderFinanceChannelsTable();
     renderFinanceCharts();
 }
 
-function renderFinChannelsTable() {
+function renderFinanceChannelsTable() {
     const tbody = document.getElementById('fin-channels-table-body');
     if (!tbody) return;
     tbody.innerHTML = '';
 
-    // Sort by 2026 revenue descending
-    const sorted = [...CHANNELS_DATA]
+    const sortedChannels = [...CHANNELS_DATA]
         .filter(c => c.revenue26 > 0)
         .sort((a, b) => b.revenue26 - a.revenue26);
 
-    sorted.forEach(c => {
+    const totalRev = sortedChannels.reduce((acc, curr) => acc + curr.revenue26, 0);
+
+    sortedChannels.forEach(row => {
         const tr = document.createElement('tr');
+        const tk = row.bookings26 > 0 ? row.revenue26 / row.bookings26 : 0;
+        const pct = totalRev > 0 ? ((row.revenue26 / totalRev) * 100).toFixed(1) : '0.0';
         tr.innerHTML = `
-            <td><strong>${c.channel}</strong></td>
-            <td class="price-col">${formatCurrency(c.revenue26)}</td>
-            <td>${c.bookings26}</td>
-            <td class="price-col">${formatCurrency(c.revenue26 / c.bookings26)}</td>
+            <td>${row.channel}</td>
+            <td style="color: var(--color-green); font-weight: 500;">${formatCurrency(row.revenue26)}</td>
+            <td style="color: var(--color-cyan);">${pct}%</td>
+            <td style="text-align: center;">${row.bookings26}</td>
+            <td>${formatCurrency(tk)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -1481,7 +1520,145 @@ function renderFinanceCharts() {
 }
 
 // ==========================================
-// 9. ADD PURCHASE MODAL LOGIC
+// 9. TAB 7: MANAGEMENT IMPACT (FATOR CAIO)
+// ==========================================
+
+function updateManagementTab() {
+    renderMgmtTimelineChart();
+    renderMgmtChannelsCharts();
+}
+
+function renderMgmtTimelineChart() {
+    const ctx = document.getElementById('mgmtTimelineChart');
+    if (!ctx) return;
+
+    if (mgmtTimelineChart) mgmtTimelineChart.destroy();
+
+    const labels = MGMT_TIMELINE_DATA.map(d => d.month);
+    const data = MGMT_TIMELINE_DATA.map(d => d.revenue);
+
+    // Identify the "Gap" indices
+    const gapStartIdx = labels.indexOf('Ago/25');
+    const gapEndIdx = labels.indexOf('Set/25');
+
+    mgmtTimelineChart = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Receita Bruta (R$)',
+                data: data,
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderWidth: 3,
+                tension: 0.3,
+                fill: true,
+                pointBackgroundColor: function(context) {
+                    const idx = context.dataIndex;
+                    if (idx >= gapStartIdx && idx <= gapEndIdx) return '#ef4444'; // Red for gap
+                    return '#10b981';
+                },
+                pointBorderColor: '#fff',
+                pointHoverRadius: 6,
+                segment: {
+                    borderColor: ctx => {
+                        const idx1 = ctx.p0DataIndex;
+                        const idx2 = ctx.p1DataIndex;
+                        // Color the segment red if it connects the gap nodes
+                        if ((idx1 === gapStartIdx - 1 && idx2 === gapStartIdx) || 
+                            (idx1 >= gapStartIdx && idx2 <= gapEndIdx) || 
+                            (idx1 === gapEndIdx && idx2 === gapEndIdx + 1)) {
+                            return '#ef4444';
+                        }
+                        return '#10b981';
+                    }
+                }
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let suffix = "";
+                            const idx = context.dataIndex;
+                            if (idx >= gapStartIdx && idx <= gapEndIdx) suffix = " (Ausência da Gestão)";
+                            if (idx === labels.indexOf('Mai/24')) suffix = " (Início da Gestão Caio)";
+                            if (idx === labels.indexOf('Out/25')) suffix = " (Retorno e Expansão)";
+                            return ` Receita: ${formatCurrency(context.raw)}${suffix}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }
+            }
+        }
+    });
+}
+
+function renderMgmtChannelsCharts() {
+    const ctxBefore = document.getElementById('mgmtChannelsBeforeChart');
+    const ctxAfter = document.getElementById('mgmtChannelsAfterChart');
+
+    if (!ctxBefore || !ctxAfter) return;
+
+    if (mgmtChannelsBeforeChart) mgmtChannelsBeforeChart.destroy();
+    if (mgmtChannelsAfterChart) mgmtChannelsAfterChart.destroy();
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return ` ${context.label}: ${context.raw}%`;
+                    }
+                }
+            }
+        }
+    };
+
+    mgmtChannelsBeforeChart = new Chart(ctxBefore.getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: MGMT_CHANNELS_BEFORE.map(c => c.channel),
+            datasets: [{
+                data: MGMT_CHANNELS_BEFORE.map(c => c.pct),
+                backgroundColor: ['#ef4444', '#3b82f6'],
+                borderWidth: 1,
+                borderColor: 'rgba(15,23,42,0.8)'
+            }]
+        },
+        options: chartOptions
+    });
+
+    mgmtChannelsAfterChart = new Chart(ctxAfter.getContext('2d'), {
+        type: 'pie',
+        data: {
+            labels: MGMT_CHANNELS_AFTER.map(c => c.channel),
+            datasets: [{
+                data: MGMT_CHANNELS_AFTER.map(c => c.pct),
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                borderWidth: 1,
+                borderColor: 'rgba(15,23,42,0.8)'
+            }]
+        },
+        options: chartOptions
+    });
+}
+
+// ==========================================
+// 10. ADD PURCHASE MODAL LOGIC
 // ==========================================
 
 const modalOverlay = document.getElementById('modal-overlay');

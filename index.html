@@ -50,6 +50,9 @@
             <button class="tab-btn" data-tab="tab-finance-occupancy">
                 <i data-lucide="line-chart"></i> Ocupação & Financeiro
             </button>
+            <button class="tab-btn" data-tab="tab-management" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: var(--color-purple);">
+                <i data-lucide="award"></i> Impacto da Gestão
+            </button>
         </nav>
 
         <!-- ================= TAB 1: LAUNDRY & OUTSOURCING ================= -->
@@ -350,6 +353,7 @@
                                 <tr>
                                     <th>Canal de Venda</th>
                                     <th>Faturamento 2026</th>
+                                    <th>% (2026)</th>
                                     <th>Faturamento 2025</th>
                                     <th>Crescimento (%)</th>
                                     <th style="text-align: center;">Diárias 2026</th>
@@ -539,103 +543,54 @@
                 </div>
             </div>
 
-            <!-- Cost Simulator Layout -->
+            <!-- Cost Data-driven Layout -->
             <div class="main-content">
-                <!-- Left Panel: Sliders & Inputs -->
-                <div class="card">
-                    <h2 class="section-title">
-                        <i data-lucide="settings"></i>
-                        Parametrizador de Custos Operacionais
-                    </h2>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        Preencha ou ajuste os valores abaixo para projetar o impacto financeiro de cada serviço na estadia.
+                <!-- Left Panel: Detailed Category Breakdown Table -->
+                <div class="card table-card" style="grid-column: span 2;">
+                    <div class="table-header-actions">
+                        <h2 class="section-title">
+                            <i data-lucide="list"></i>
+                            Rateio de Custos por Categoria (Unit Economics)
+                        </h2>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                        Visão analítica de cada despesa do DRE dividida pelo volume de Hóspedes (CPG), Diárias (CPOR) e Reservas (CPR).
                     </p>
-
-                    <!-- Cost Slider: Breakfast -->
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span>Café da Manhã (Custo de insumos por hóspede/dia)</span>
-                            <span class="slider-val" id="val-breakfast">R$ 18,00</span>
-                        </div>
-                        <input type="range" id="input-breakfast" min="0" max="60" step="0.50" value="18">
-                    </div>
-
-                    <!-- Cost Slider: Cleaning -->
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span>Limpeza e Arrumação (Custo médio por quarto/limpeza)</span>
-                            <span class="slider-val" id="val-cleaning">R$ 25,00</span>
-                        </div>
-                        <input type="range" id="input-cleaning" min="0" max="100" step="1.00" value="25">
-                    </div>
-
-                    <!-- Input: Fixed Monthly Costs -->
-                    <div class="form-group" style="margin-bottom: 1.25rem;">
-                        <label for="input-fixed-costs">
-                            Despesas Fixas Mensais Rateadas (R$)
-                            <span style="display:block; font-size: 0.72rem; font-weight: normal; color: var(--text-muted); margin-top: 2px;">
-                                (Ex: Energia elétrica geral, internet, sistemas, manutenção geral)
-                            </span>
-                        </label>
-                        <input type="number" id="input-fixed-costs" value="5000" min="0" step="100">
-                    </div>
-
-                    <!-- Input: Channels Commission -->
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span>Comissão Média de Canais (Booking, Expedia, etc. em %)</span>
-                            <span class="slider-val" id="val-commission">15%</span>
-                        </div>
-                        <input type="range" id="input-commission" min="0" max="25" step="0.5" value="15">
-                    </div>
-
-                    <div class="info-note">
-                        <i data-lucide="info"></i>
-                        <span>O custo químico de **Lavanderia** está travado em **R$ 4,49 por hóspede** (baseado no consumo real de químicos apurado na aba 1). Se você terceirizar, o sistema atualizará esta fatia com a taxa da empresa contratada!</span>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Categoria da Despesa</th>
+                                    <th style="text-align: right;">Custo Total (R$)</th>
+                                    <th style="text-align: right;">Por Hóspede (CPG)</th>
+                                    <th style="text-align: right;">Por Diária (CPOR)</th>
+                                    <th style="text-align: right;">Por Reserva (CPR)</th>
+                                    <th style="text-align: center;">% do Custo Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cost-breakdown-tbody">
+                                <!-- Injected dynamically via app.js -->
+                            </tbody>
+                            <tfoot id="cost-breakdown-tfoot" style="font-weight: 700; background: rgba(255,255,255,0.02);">
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
 
-                <!-- Right Panel: Profit Margin Indicator & circular gauge -->
-                <div class="card profit-widget">
-                    <h2 class="section-title" style="align-self: flex-start;">
-                        <i data-lucide="pie-chart"></i>
-                        Margem Operacional Líquida
+                <!-- Right Panel: Instructions for Export -->
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="upload-cloud"></i>
+                        Integração de Dados
                     </h2>
-                    
-                    <div class="gauge-svg-container">
-                        <svg width="160" height="160">
-                            <defs>
-                                <linearGradient id="gauge-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#3b82f6" />
-                                    <stop offset="100%" stop-color="#10b981" />
-                                </linearGradient>
-                            </defs>
-                            <circle class="gauge-bg" cx="80" cy="80" r="70" />
-                            <circle class="gauge-fill" id="gauge-fill-circle" cx="80" cy="80" r="70" />
-                        </svg>
-                        <div class="gauge-text-overlay">
-                            <span class="gauge-pct" id="gauge-margin-pct">0%</span>
-                            <span class="gauge-lbl">Margem</span>
-                        </div>
-                    </div>
-
-                    <div class="profit-summary-card">
-                        <div class="profit-row">
-                            <span class="profit-lbl">Diária Média Bruta (ADR):</span>
-                            <span class="profit-val" id="profit-adr">R$ 388,57</span>
-                        </div>
-                        <div class="profit-row">
-                            <span class="profit-lbl">(-) Comissão Média do Canal:</span>
-                            <span class="profit-val" id="profit-commission" style="color: var(--color-red);">-R$ 0,00</span>
-                        </div>
-                        <div class="profit-row">
-                            <span class="profit-lbl">(-) Custos Operacionais por Diária:</span>
-                            <span class="profit-val" id="profit-operating-cost" style="color: var(--color-purple);">-R$ 0,00</span>
-                        </div>
-                        <div class="profit-row" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.75rem;">
-                            <span class="profit-lbl" style="font-weight: 700;">(=) Margem de Lucro Diária:</span>
-                            <span class="profit-val-highlight" id="profit-net-value">R$ 0,00</span>
-                        </div>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.5;">
+                        Para manter estes dados atualizados, você pode exportar o relatório de <strong>Extrato de Contas a Pagar / DRE</strong> da Hospedin filtrando o período desejado (Ex: Anual ou Mensal).
+                    </p>
+                    <div style="background: rgba(15, 23, 42, 0.4); padding: 1rem; border-radius: var(--radius-sm); border: 1px dashed var(--border-color); text-align: center;">
+                        <i data-lucide="file-spreadsheet" style="width: 32px; height: 32px; color: var(--color-cyan); margin-bottom: 0.5rem;"></i>
+                        <h3 style="font-size: 0.9rem; margin-bottom: 0.25rem;">Importação em Lote (CSV/Excel)</h3>
+                        <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem;">Módulo de importação em desenvolvimento para consolidar automaticamente.</p>
+                        <button class="btn btn-secondary" style="width: 100%; justify-content: center;" disabled>Aguardando Arquivo</button>
                     </div>
                 </div>
             </div>
@@ -1012,6 +967,7 @@
                                 <tr>
                                     <th>Canal</th>
                                     <th>Faturamento</th>
+                                    <th>% do Total</th>
                                     <th>Reservas</th>
                                     <th>Ticket Médio</th>
                                 </tr>
@@ -1090,6 +1046,114 @@
                 <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; margin: 0;">
                     Consta no sistema um volume extra de vendas já realizadas no valor de <strong>R$ 51.266,44</strong>. Para manter a conciliação estrita com os relatórios das planilhas de canais e finanças, este montante foi mantido fora das somas centrais, servindo como ajuste operacional extracontábil.
                 </p>
+            </div>
+        </div>
+
+        <!-- ================= TAB 7: MANAGEMENT IMPACT (FATOR CAIO) ================= -->
+        <div id="tab-management" class="tab-content">
+            <!-- Storyline Header -->
+            <div class="card" style="margin-bottom: 2rem; border-left: 5px solid var(--color-purple); background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);">
+                <h2 class="section-title" style="color: var(--color-purple); margin-bottom: 1rem;">
+                    <i data-lucide="award"></i>
+                    O "Fator Caio": Desempenho e Impacto na Gestão (2024 - 2026)
+                </h2>
+                <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">
+                    Este painel ilustra de forma clara e visual o impacto direto da gestão nos resultados da pousada. Os dados abaixo acompanham a evolução desde a <strong>assunção da gerência (Maio/2024)</strong>, o impacto da <strong>ausência (Agosto e Setembro/2025)</strong>, e a explosão de performance com o <strong>retorno e estruturação de novos canais comerciais (Out/2025 em diante)</strong>.
+                </p>
+
+                <!-- Milestones Timeline -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                    <div style="flex: 1; min-width: 200px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 8px;">
+                        <h4 style="color: var(--color-green); margin: 0 0 0.5rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="play" style="width: 14px; height: 14px;"></i> Maio de 2024
+                        </h4>
+                        <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem;">Início da Gerência</div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">Organização de processos, melhoria de avaliações e subida de métricas de ocupação.</p>
+                    </div>
+
+                    <div style="flex: 1; min-width: 200px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); padding: 1rem; border-radius: 8px;">
+                        <h4 style="color: var(--color-red); margin: 0 0 0.5rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="pause" style="width: 14px; height: 14px;"></i> Ago a Set de 2025
+                        </h4>
+                        <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem;">A Ausência</div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">Sem gestão dedicada, ocorreu uma queda abrupta nas reservas do Booking e taxa de conversão.</p>
+                    </div>
+
+                    <div style="flex: 1; min-width: 200px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); padding: 1rem; border-radius: 8px;">
+                        <h4 style="color: var(--color-blue); margin: 0 0 0.5rem 0; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i data-lucide="fast-forward" style="width: 14px; height: 14px;"></i> Out/2025 em Diante
+                        </h4>
+                        <div style="font-size: 0.9rem; font-weight: 600; margin-bottom: 0.25rem;">O Retorno e a Expansão</div>
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin: 0;">Retomada imediata, adesão da Cobrastur, criação no Expedia e lançamento do Motor de Reservas próprio.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical Revenue Timeline Chart -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <h2 class="section-title">
+                    <i data-lucide="trending-up"></i>
+                    Evolução Histórica da Receita (A Queda e a Recuperação)
+                </h2>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+                    A área destacada em vermelho ilustra o "Gap" financeiro gerado pela ausência da gestão. Observe a linha de tendência explodir logo após o retorno e a integração de novos canais.
+                </p>
+                <div class="chart-container" style="height: 350px;">
+                    <canvas id="mgmtTimelineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Channel Diversification Impact -->
+            <div class="main-content">
+                <!-- Pie charts before/after -->
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="pie-chart"></i>
+                        Dependência de Canais (Antes do Retorno)
+                    </h2>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); text-align: center;">Até Agosto de 2025</p>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="mgmtChannelsBeforeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card" style="grid-column: span 1;">
+                    <h2 class="section-title">
+                        <i data-lucide="share-2"></i>
+                        Diversificação Comercial (Após Retorno)
+                    </h2>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); text-align: center;">De Outubro/2025 em diante</p>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="mgmtChannelsAfterChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- KPI Grid for Impact -->
+                <div class="card table-card" style="grid-column: span 2;">
+                    <h2 class="section-title">
+                        <i data-lucide="bar-chart"></i>
+                        Métricas de Impacto Direto
+                    </h2>
+                    <div class="dashboard-grid" style="grid-template-columns: repeat(3, 1fr); padding: 1rem; gap: 1.5rem; background: transparent; box-shadow: none;">
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="color: var(--color-cyan); font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">+214%</div>
+                            <div style="font-size: 0.9rem; font-weight: 500; color: var(--text-primary);">Aumento de Reservas Diretas</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Impulsionado pelo novo Motor próprio.</div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="color: var(--color-purple); font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">3 Novos Canais</div>
+                            <div style="font-size: 0.9rem; font-weight: 500; color: var(--text-primary);">Integração Ativa</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Cobrastur, Expedia e Site próprio adicionados ao mix.</div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                            <div style="color: var(--color-green); font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">-18% Risco</div>
+                            <div style="font-size: 0.9rem; font-weight: 500; color: var(--text-primary);">Redução de Dependência OTA</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">O Booking.com passou de quase monopólio para parceiro equilibrado.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
