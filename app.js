@@ -654,7 +654,28 @@ function renderCommercialCharts() {
 // 7. TAB 3: FUTURE RESERVATIONS LOGIC (NEW)
 // ==========================================
 
-function updateFutureTab() {
+async function updateFutureTab() {
+    // Try to fetch real data from Hospedin API via our Vercel Serverless Function
+    try {
+        const res = await fetch('/api/hospedin?path=/reservations');
+        const apiData = await res.json();
+        
+        if (!res.ok || apiData.errors) {
+            console.warn('Falha ao buscar dados reais da Hospedin (Caindo para mock data):', apiData.errors || res.statusText);
+            throw new Error('Fallback to mock data');
+        }
+
+        // If we get real data, we log it and we could map it here.
+        // As the exact structure might need inspection, we log it for development:
+        console.log('Dados reais de reservas Hospedin:', apiData.data);
+        
+        // TODO: Replace FUTURE_BOOKINGS_LIST with mapped data from apiData.data
+        // For now, if it succeeds, we still render the fallback until the data mapping is tailored to the exact Hospedin API schema.
+        
+    } catch (err) {
+        console.log('Utilizando dados mockados de reservas (offline ou falha na API).');
+    }
+
     // Populate KPIs
     document.getElementById('kpi-future-revenue').innerText = formatCurrency(FUTURE_SUMMARY.totalRevenue);
     document.getElementById('kpi-future-bookings').innerText = FUTURE_SUMMARY.totalBookings;
