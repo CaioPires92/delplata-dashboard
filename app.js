@@ -259,9 +259,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     borderRadius: 4
                 },
                 {
-                    label: 'Site / Expedia / Outros',
-                    data: [0, 6, 9, 86],
+                    label: 'Site Próprio',
+                    data: [0, 0, 0, 26],
                     backgroundColor: '#8b5cf6', // purple
+                    borderRadius: 4
+                },
+                {
+                    label: 'Expedia',
+                    data: [0, 0, 1, 38],
+                    backgroundColor: '#ec4899', // pink
+                    borderRadius: 4
+                },
+                {
+                    label: 'Cobrastur',
+                    data: [0, 0, 0, 11],
+                    backgroundColor: '#06b6d4', // cyan
+                    borderRadius: 4
+                },
+                {
+                    label: 'Outros',
+                    data: [4, 6, 9, 11],
+                    backgroundColor: '#9ca3af', // gray
                     borderRadius: 4
                 }
             ]
