@@ -156,57 +156,87 @@ const DRE_REVENUES = [
 ];
 
 const DRE_EXPENSES = [
-    { category: 'Impostos e taxas', value26: 109512.73, value25: 72390.04 },
-    { category: 'Salários', value26: 105412.47, value25: 93778.00 },
-    { category: 'Alimentos', value26: 76020.48, value25: 88412.47 },
-    { category: 'Comissão reservas', value26: 37847.02, value25: 48027.78 },
-    { category: 'Manutenção', value26: 27107.48, value25: 40492.58 },
-    { category: 'Produtos de limpeza', value26: 20986.14, value25: 15513.28 },
-    { category: 'sabesp (Água)', value26: 20158.46, value25: 20657.83 },
-    { category: 'Luz (Energia)', value26: 17283.29, value25: 17120.25 },
-    { category: 'Obras', value26: 13400.00, value25: 95362.65 },
-    { category: 'Internet', value26: 1724.80, value25: 2961.91 },
-    { category: 'Telefone', value26: 426.70, value25: 390.00 },
-    { category: 'Papelaria', value26: 128.00, value25: 126.00 },
-    { category: 'Outros', value26: 2668.66, value25: 11365.87 }
-];
+// CUSTOS FIXOS (Média Financeira de 2026)
+let DRE_EXPENSES = {
+    fixed: [
+        { name: 'Folha Pagamento', amount: 21600.09 },
+        { name: 'Impostos e Taxas', amount: 21922.74 },
+        { name: 'Manutenção / Obras', amount: 8511.47 },
+        { name: 'Luz (Energia)', amount: 3624.58 },
+        { name: 'Sabesp (Água)', amount: 4152.16 },
+        { name: 'Internet / Telefone', amount: 487.26 }
+    ],
+    variable: [
+        { name: 'Alimentos (Café)', amount: 15702.44 },
+        { name: 'Produtos de Limpeza', amount: 4708.48 },
+        { name: 'Comissão Reservas', amount: 7569.40 },
+        { name: 'Lavanderia', amount: 3500.00 } // Valor manual placeholder
+    ]
+};
 
 // ==========================================
 // 1b. MOCK DATA FOR MANAGEMENT IMPACT (FATOR CAIO)
 // ==========================================
 
 const MGMT_TIMELINE_DATA = [
-    { month: 'Abr/25', revenue: 35000.44 },
-    { month: 'Mai/25', revenue: 73240.48 },
-    { month: 'Jun/25', revenue: 100451.48 },
-    { month: 'Jul/25', revenue: 122243.06 },
-    // Caio leaves in August 2025 (The GAP)
-    { month: 'Ago/25', revenue: 72188.11 },
-    { month: 'Set/25', revenue: 78166.41 },
-    // Caio returns in October 2025
-    { month: 'Out/25', revenue: 92045.84 },
-    { month: 'Nov/25', revenue: 115014.93 },
-    { month: 'Dez/25', revenue: 187359.10 },
-    { month: 'Jan/26', revenue: 126881.20 },
-    { month: 'Fev/26', revenue: 92969.74 },
-    { month: 'Mar/26', revenue: 82813.34 },
-    { month: 'Abr/26', revenue: 110562.86 },
-    { month: 'Mai/26', revenue: 85258.68 }
+    { month: 'Jan/23', revenue: 32363.09 },
+    { month: 'Fev/23', revenue: 56408.17 },
+    { month: 'Mar/23', revenue: 30032.85 },
+    { month: 'Abr/23', revenue: 81004.92 },
+    { month: 'Mai/23', revenue: 34094.62 },
+    { month: 'Jun/23', revenue: 65283.85 },
+    { month: 'Jul/23', revenue: 96102.05 },
+    { month: 'Ago/23', revenue: 31712.93 },
+    { month: 'Set/23', revenue: 62966.28 },
+    { month: 'Out/23', revenue: 36075.57 },
+    { month: 'Nov/23', revenue: 51754.54 },
+    { month: 'Dez/23', revenue: 102186.10 },
+    { month: 'Jan/24', revenue: 72286.43 },
+    { month: 'Fev/24', revenue: 60906.00 },
+    { month: 'Mar/24', revenue: 48405.55 },
+    { month: 'Abr/24', revenue: 41470.37 },
+    { month: 'Mai/24', revenue: 88632.71 },
+    { month: 'Jun/24', revenue: 72170.66 },
+    { month: 'Jul/24', revenue: 138783.41 },
+    { month: 'Ago/24', revenue: 89395.94 },
+    { month: 'Set/24', revenue: 83532.36 },
+    { month: 'Out/24', revenue: 81089.94 },
+    { month: 'Nov/24', revenue: 97429.63 },
+    { month: 'Dez/24', revenue: 128812.60 },
+    { month: 'Jan/25', revenue: 121886.19 },
+    { month: 'Fev/25', revenue: 95743.94 },
+    { month: 'Mar/25', revenue: 102397.79 },
+    { month: 'Abr/25', revenue: 116611.79 },
+    { month: 'Mai/25', revenue: 105647.17 },
+    { month: 'Jun/25', revenue: 118986.01 },
+    { month: 'Jul/25', revenue: 140498.08 },
+    { month: 'Ago/25', revenue: 75860.50 },
+    { month: 'Set/25', revenue: 79783.41 },
+    { month: 'Out/25', revenue: 94043.84 },
+    { month: 'Nov/25', revenue: 117860.93 },
+    { month: 'Dez/25', revenue: 197476.96 },
+    { month: 'Jan/26', revenue: 131664.20 },
+    { month: 'Fev/26', revenue: 95003.74 },
+    { month: 'Mar/26', revenue: 85752.34 },
+    { month: 'Abr/26', revenue: 112313.86 },
+    { month: 'Mai/26', revenue: 86415.68 }
 ];
 
 const MGMT_CHANNELS_BEFORE = [
-    { name: 'Booking', value: 60, amount: 370326.45, fill: 'var(--booking)' },
-    { name: 'WhatsApp', value: 35, amount: 215812.61, fill: '#128C7E' },
-    { name: 'Outros (Balcão/Tel)', value: 5, amount: 32251.07, fill: '#9ca3af' }
+    { name: 'Booking', value: 45.7, amount: 413135.04, fill: 'var(--booking)' },
+    { name: 'WhatsApp', value: 42.7, amount: 385529.03, fill: '#128C7E' },
+    { name: 'Telefone/Recep.', value: 10.3, amount: 93066.85, fill: '#9ca3af' },
+    { name: 'Outros', value: 1.3, amount: 11322.40, fill: '#64748b' }
 ];
 
 const MGMT_CHANNELS_AFTER = [
-    { name: 'Booking', value: 65, amount: 389659.29, fill: 'var(--booking)' },
-    { name: 'WhatsApp', value: 19, amount: 116454.43, fill: '#128C7E' },
-    { name: 'Expedia', value: 4, amount: 24876.69, fill: '#000080' },
-    { name: 'Motor Site', value: 3, amount: 18908.31, fill: '#f59e0b' },
-    { name: 'Cobrastur', value: 3, amount: 15533.00, fill: '#8b5cf6' },
-    { name: 'Outros (Balcão/Tel)', value: 6, amount: 34746.16, fill: '#9ca3af' }
+    { name: 'Booking', value: 64.5, amount: 593473.41, fill: 'var(--booking)' },
+    { name: 'WhatsApp', value: 26.5, amount: 243566.20, fill: '#128C7E' },
+    { name: 'Recepção', value: 3.1, amount: 28359.00, fill: '#9ca3af' },
+    { name: 'Expedia', value: 1.9, amount: 17296.38, fill: '#000080' },
+    { name: 'Site Próprio', value: 1.3, amount: 12300.30, fill: '#f59e0b' },
+    { name: 'Cobrastur', value: 0.7, amount: 6410.00, fill: '#8b5cf6' },
+    { name: 'Outros (Tel/Email)', value: 2.1, amount: 19126.26, fill: '#64748b' }
 ];
 
 // ==========================================
