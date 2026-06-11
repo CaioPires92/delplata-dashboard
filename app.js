@@ -369,24 +369,25 @@ function renderCostBreakdown() {
     if (!tbody || !tfoot) return;
     tbody.innerHTML = '';
     
-    // Calculate global denominators from COMMERCIAL_SUMMARY
-    const totalGuests = COMMERCIAL_SUMMARY.totalGuests || 1;
-    const totalNights = COMMERCIAL_SUMMARY.totalNights || 1;
-    const totalBookings = COMMERCIAL_SUMMARY.totalBookings || 1;
+    // Calculate global denominators from CSV extraction (Média Mensal de Jan a Mai de 2026)
+    // Extraímos os dados diretos dos relatórios:
+    const avgMonthlyGuests = 345.6;
+    const avgMonthlyNights = 265;
+    const avgMonthlyBookings = 164; // Estimado baseado na proporção (1325 / 5 = 265 diárias. ~164 reservas)
     
-    // We use DRE_EXPENSES as our data source for costs
-    const totalExpenses = DRE_EXPENSES.reduce((sum, item) => sum + item.value26, 0);
+    const allExpenses = [...DRE_EXPENSES.fixed, ...DRE_EXPENSES.variable];
+    const totalExpenses = allExpenses.reduce((sum, item) => sum + item.amount, 0);
 
-    DRE_EXPENSES.forEach(item => {
-        const cost = item.value26;
-        const cpg = cost / totalGuests;
-        const cpor = cost / totalNights;
-        const cpr = cost / totalBookings;
+    allExpenses.forEach(item => {
+        const cost = item.amount;
+        const cpg = cost / avgMonthlyGuests;
+        const cpor = cost / avgMonthlyNights;
+        const cpr = cost / avgMonthlyBookings;
         const pct = ((cost / totalExpenses) * 100).toFixed(1);
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td>${item.category}</td>
+            <td>${item.name}</td>
             <td style="text-align: right; color: var(--color-purple);">${formatCurrency(cost)}</td>
             <td style="text-align: right; color: var(--color-cyan);">${formatCurrency(cpg)}</td>
             <td style="text-align: right; color: var(--color-green);">${formatCurrency(cpor)}</td>
@@ -397,35 +398,23 @@ function renderCostBreakdown() {
     });
 
     // Populate totals row
-    const totalCpg = totalExpenses / totalGuests;
-    const totalCpor = totalExpenses / totalNights;
-    const totalCpr = totalExpenses / totalBookings;
+    const totalCpg = totalExpenses / avgMonthlyGuests;
+    const totalCpor = totalExpenses / avgMonthlyNights;
+    const totalCpr = totalExpenses / avgMonthlyBookings;
 
     tfoot.innerHTML = `
         <tr>
-            <td>TOTAL GERAL</td>
-            <td style="text-align: right; color: var(--color-purple);">${formatCurrency(totalExpenses)}</td>
-            <td style="text-align: right; color: var(--color-cyan);">${formatCurrency(totalCpg)}</td>
-            <td style="text-align: right; color: var(--color-green);">${formatCurrency(totalCpor)}</td>
-            <td style="text-align: right; color: var(--text-secondary);">${formatCurrency(totalCpr)}</td>
-            <td style="text-align: center;">100%</td>
+            <th>Custo Operacional Total</th>
+            <th style="text-align: right; color: var(--color-purple);">${formatCurrency(totalExpenses)}</th>
+            <th style="text-align: right; color: var(--color-cyan);">${formatCurrency(totalCpg)}</th>
+            <th style="text-align: right; color: var(--color-green);">${formatCurrency(totalCpor)}</th>
+            <th style="text-align: right; color: var(--text-secondary);">${formatCurrency(totalCpr)}</th>
+            <th style="text-align: center;">100%</th>
         </tr>
     `;
-    
-    // Update KPIs at the top
-    const breakfastItem = DRE_EXPENSES.find(i => i.category === 'Alimentos');
-    const breakfastCpg = breakfastItem ? (breakfastItem.value26 / totalGuests) : 0;
-    
-    const cleaningItem = DRE_EXPENSES.find(i => i.category === 'Produtos de limpeza');
-    const cleaningCpg = cleaningItem ? (cleaningItem.value26 / totalGuests) : 0;
-    
-    document.getElementById('kpi-cost-breakfast').innerText = formatCurrency(breakfastCpg);
-    
-    const kpiFixed = document.getElementById('kpi-cost-fixed');
-    if(kpiFixed) kpiFixed.innerText = formatCurrency(totalCpg - breakfastCpg - cleaningCpg);
-    
-    const kpiTotal = document.getElementById('kpi-cost-total-guest');
-    if(kpiTotal) kpiTotal.innerText = formatCurrency(totalCpg);
+    // Atualizar os KPIs do topo da aba de Custos
+    const kpiTotalGuest = document.getElementById('kpi-cost-total-guest');
+    if (kpiTotalGuest) kpiTotalGuest.innerText = formatCurrency(totalCpg);
 }
 
 // ==========================================
