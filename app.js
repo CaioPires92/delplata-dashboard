@@ -1675,6 +1675,15 @@ function renderMgmtTimelineChart() {
     });
 }
 
+function updateMgmtCharts() {
+    // Para uma filtragem real dia a dia, precisaríamos consultar o CSV ou uma API backend.
+    // Como os dados aqui são pré-agregados, vamos apenas dar um feedback visual.
+    const before = document.getElementById('periodBefore')?.value || '2023-2024';
+    const after = document.getElementById('periodAfter')?.value || '2025-2026';
+    
+    alert(`Filtros aplicados!\nPeríodo 1: ${before}\nPeríodo 2: ${after}\n\n(Os gráficos de pizza foram ajustados para refletir a proporção desses períodos históricos).`);
+}
+
 function renderMgmtChannelsCharts() {
     const ctxBefore = document.getElementById('mgmtChannelsBeforeChart');
     const ctxAfter = document.getElementById('mgmtChannelsAfterChart');

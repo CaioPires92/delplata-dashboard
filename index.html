@@ -1055,11 +1055,33 @@
             <div class="card" style="margin-bottom: 2rem; border-left: 5px solid var(--color-purple); background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);">
                 <h2 class="section-title" style="color: var(--color-purple); margin-bottom: 1rem;">
                     <i data-lucide="award"></i>
-                    O "Fator Caio": Desempenho e Impacto na Gestão (2024 - 2026)
+                    Impacto da Gestão e Desempenho Histórico
                 </h2>
                 <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1.5rem;">
-                    Este painel ilustra de forma clara e visual o impacto direto da gestão nos resultados da pousada. Os dados abaixo acompanham a evolução desde a <strong>assunção da gerência (Maio/2024)</strong>, o impacto da <strong>ausência (Agosto e Setembro/2025)</strong>, e a explosão de performance com o <strong>retorno e estruturação de novos canais comerciais (Out/2025 em diante)</strong>.
+                    Este painel ilustra a evolução histórica de performance e receita da pousada. Utilize os filtros abaixo para isolar períodos específicos (como a assunção da gerência, ausência, e retomada comercial) para analisar o impacto nos canais de venda e faturamento geral.
                 </p>
+                <!-- Filtros de Período -->
+                <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem; background: rgba(30, 41, 59, 0.8); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <div style="display: flex; flex-direction: column;">
+                        <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Período "Antes":</label>
+                        <select id="periodBefore" class="select-input" style="padding: 0.5rem; min-width: 150px;">
+                            <option value="2023-2024">Jan/2023 - Abr/2024</option>
+                            <option value="2023">Apenas 2023</option>
+                            <option value="2024">Apenas 2024 (Pré-Saída)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; flex-direction: column;">
+                        <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Período "Depois":</label>
+                        <select id="periodAfter" class="select-input" style="padding: 0.5rem; min-width: 150px;">
+                            <option value="2025-2026">Out/2025 - Mai/2026</option>
+                            <option value="2025">Apenas 2025</option>
+                            <option value="2026">Apenas 2026</option>
+                        </select>
+                    </div>
+                    <button class="action-button primary" onclick="updateMgmtCharts()" style="margin-left: auto;">
+                        <i data-lucide="filter"></i> Aplicar Filtros
+                    </button>
+                </div>
 
                 <!-- Milestones Timeline -->
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
