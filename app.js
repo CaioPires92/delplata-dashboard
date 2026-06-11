@@ -295,7 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return context.dataset.label + ': ' + context.raw + ' reservas';
+                            let total = 0;
+                            context.chart.data.datasets.forEach(dataset => {
+                                total += dataset.data[context.dataIndex];
+                            });
+                            let percentage = ((context.raw / total) * 100).toFixed(1) + '%';
+                            return context.dataset.label + ': ' + context.raw + ' reservas (' + percentage + ')';
                         }
                     }
                 }
