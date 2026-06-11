@@ -680,7 +680,7 @@ input:focus, select:focus {
     padding: 0.35rem;
     border-radius: var(--radius-md);
     border: 1px solid var(--border-color);
-    max-width: 860px;
+    max-width: 1150px;
     margin: 0 auto 2.5rem auto;
     backdrop-filter: blur(12px);
 }
