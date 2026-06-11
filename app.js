@@ -195,18 +195,18 @@ const MGMT_TIMELINE_DATA = [
 ];
 
 const MGMT_CHANNELS_BEFORE = [
-    { name: 'Booking', value: 60, fill: 'var(--booking)' },
-    { name: 'WhatsApp', value: 35, fill: '#128C7E' },
-    { name: 'Outros (Balcão/Tel)', value: 5, fill: '#9ca3af' }
+    { name: 'Booking', value: 60, amount: 370326.45, fill: 'var(--booking)' },
+    { name: 'WhatsApp', value: 35, amount: 215812.61, fill: '#128C7E' },
+    { name: 'Outros (Balcão/Tel)', value: 5, amount: 32251.07, fill: '#9ca3af' }
 ];
 
 const MGMT_CHANNELS_AFTER = [
-    { name: 'Booking', value: 65, fill: 'var(--booking)' },
-    { name: 'WhatsApp', value: 19, fill: '#128C7E' },
-    { name: 'Expedia', value: 4, fill: '#000080' },
-    { name: 'Motor Site', value: 3, fill: '#f59e0b' },
-    { name: 'Cobrastur', value: 3, fill: '#8b5cf6' },
-    { name: 'Outros (Balcão/Tel)', value: 6, fill: '#9ca3af' }
+    { name: 'Booking', value: 65, amount: 389659.29, fill: 'var(--booking)' },
+    { name: 'WhatsApp', value: 19, amount: 116454.43, fill: '#128C7E' },
+    { name: 'Expedia', value: 4, amount: 24876.69, fill: '#000080' },
+    { name: 'Motor Site', value: 3, amount: 18908.31, fill: '#f59e0b' },
+    { name: 'Cobrastur', value: 3, amount: 15533.00, fill: '#8b5cf6' },
+    { name: 'Outros (Balcão/Tel)', value: 6, amount: 34746.16, fill: '#9ca3af' }
 ];
 
 // ==========================================
@@ -1607,7 +1607,10 @@ function renderMgmtChannelsCharts() {
             tooltip: {
                 callbacks: {
                     label: function(context) {
-                        return ` ${context.label}: ${context.raw}%`;
+                        const pct = context.raw;
+                        const amount = context.dataset.amounts ? context.dataset.amounts[context.dataIndex] : 0;
+                        const formattedAmount = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(amount);
+                        return ` ${context.label}: ${formattedAmount} (${pct}%)`;
                     }
                 }
             }
@@ -1620,6 +1623,7 @@ function renderMgmtChannelsCharts() {
             labels: MGMT_CHANNELS_BEFORE.map(c => c.name || c.channel),
             datasets: [{
                 data: MGMT_CHANNELS_BEFORE.map(c => c.value || c.pct),
+                amounts: MGMT_CHANNELS_BEFORE.map(c => c.amount),
                 backgroundColor: MGMT_CHANNELS_BEFORE.map(c => c.fill) || ['#ef4444', '#3b82f6', '#9ca3af'],
                 borderWidth: 1,
                 borderColor: 'rgba(15,23,42,0.8)'
@@ -1634,6 +1638,7 @@ function renderMgmtChannelsCharts() {
             labels: MGMT_CHANNELS_AFTER.map(c => c.name || c.channel),
             datasets: [{
                 data: MGMT_CHANNELS_AFTER.map(c => c.value || c.pct),
+                amounts: MGMT_CHANNELS_AFTER.map(c => c.amount),
                 backgroundColor: MGMT_CHANNELS_AFTER.map(c => c.fill) || ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4', '#9ca3af'],
                 borderWidth: 1,
                 borderColor: 'rgba(15,23,42,0.8)'
