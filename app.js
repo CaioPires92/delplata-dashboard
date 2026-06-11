@@ -365,54 +365,90 @@ function updateCostsTab() {
 
 function renderCostBreakdown() {
     const tbody = document.getElementById('cost-breakdown-tbody');
-    const tfoot = document.getElementById('cost-breakdown-tfoot');
-    if (!tbody || !tfoot) return;
+    if (!tbody) return;
     tbody.innerHTML = '';
     
     // Calculate global denominators from CSV extraction (Média Mensal de Jan a Mai de 2026)
-    // Extraímos os dados diretos dos relatórios:
     const avgMonthlyGuests = 345.6;
     const avgMonthlyNights = 265;
-    const avgMonthlyBookings = 164; // Estimado baseado na proporção (1325 / 5 = 265 diárias. ~164 reservas)
+    const avgMonthlyBookings = 164;
+    
+    // Populate the new cards in index.html
+    const calcGuests = document.getElementById('calc-guests');
+    const calcNights = document.getElementById('calc-nights');
+    const calcBookings = document.getElementById('calc-bookings');
+    if (calcGuests) calcGuests.innerText = Math.round(avgMonthlyGuests);
+    if (calcNights) calcNights.innerText = Math.round(avgMonthlyNights);
+    if (calcBookings) calcBookings.innerText = Math.round(avgMonthlyBookings);
     
     const allExpenses = [...DRE_EXPENSES.fixed, ...DRE_EXPENSES.variable];
     const totalExpenses = allExpenses.reduce((sum, item) => sum + item.amount, 0);
 
-    allExpenses.forEach(item => {
+    // Função auxiliar para gerar linhas da tabela
+    const generateRow = (item, isTotal = false) => {
         const cost = item.amount;
         const cpg = cost / avgMonthlyGuests;
         const cpor = cost / avgMonthlyNights;
         const cpr = cost / avgMonthlyBookings;
         const pct = ((cost / totalExpenses) * 100).toFixed(1);
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${item.name}</td>
-            <td style="text-align: right; color: var(--color-purple);">${formatCurrency(cost)}</td>
-            <td style="text-align: right; color: var(--color-cyan);">${formatCurrency(cpg)}</td>
-            <td style="text-align: right; color: var(--color-green);">${formatCurrency(cpor)}</td>
-            <td style="text-align: right; color: var(--text-secondary);">${formatCurrency(cpr)}</td>
-            <td style="text-align: center; font-weight: 500;">${pct}%</td>
+        const fontWeight = isTotal ? '700' : '400';
+        const colorTitle = isTotal ? 'var(--text-primary)' : 'inherit';
+
+        return `
+            <tr style="${isTotal ? 'background: rgba(255,255,255,0.02);' : ''}">
+                <td style="font-weight: ${fontWeight}; color: ${colorTitle};">${item.name}</td>
+                <td style="text-align: right; color: var(--color-purple); font-weight: ${fontWeight};">${formatCurrency(cost)}</td>
+                <td style="text-align: right; color: var(--color-cyan); font-weight: ${fontWeight};">${formatCurrency(cpg)}</td>
+                <td style="text-align: right; color: var(--color-green); font-weight: ${fontWeight};">${formatCurrency(cpor)}</td>
+                <td style="text-align: right; color: var(--text-secondary); font-weight: ${fontWeight};">${formatCurrency(cpr)}</td>
+                <td style="text-align: center; font-weight: 500;">${isTotal ? pct + '%' : pct + '%'}</td>
+            </tr>
         `;
-        tbody.appendChild(tr);
-    });
+    };
 
-    // Populate totals row
-    const totalCpg = totalExpenses / avgMonthlyGuests;
-    const totalCpor = totalExpenses / avgMonthlyNights;
-    const totalCpr = totalExpenses / avgMonthlyBookings;
-
-    tfoot.innerHTML = `
-        <tr>
-            <th>Custo Operacional Total</th>
-            <th style="text-align: right; color: var(--color-purple);">${formatCurrency(totalExpenses)}</th>
-            <th style="text-align: right; color: var(--color-cyan);">${formatCurrency(totalCpg)}</th>
-            <th style="text-align: right; color: var(--color-green);">${formatCurrency(totalCpor)}</th>
-            <th style="text-align: right; color: var(--text-secondary);">${formatCurrency(totalCpr)}</th>
-            <th style="text-align: center;">100%</th>
+    // 1. CUSTOS FIXOS
+    let html = `
+        <tr style="background: rgba(30, 41, 59, 0.8);">
+            <td colspan="6" style="font-weight: 700; color: var(--color-blue); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px;">Custos Fixos Operacionais</td>
         </tr>
     `;
+    let subtotalFixed = 0;
+    DRE_EXPENSES.fixed.forEach(item => {
+        subtotalFixed += item.amount;
+        html += generateRow(item);
+    });
+    html += generateRow({ name: 'SUBTOTAL (CUSTOS FIXOS)', amount: subtotalFixed }, true);
+
+    // 2. CUSTOS VARIÁVEIS
+    html += `
+        <tr style="background: rgba(30, 41, 59, 0.8);">
+            <td colspan="6" style="font-weight: 700; color: var(--color-yellow); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; margin-top: 1rem;">Custos Variáveis (Insumos)</td>
+        </tr>
+    `;
+    let subtotalVariable = 0;
+    DRE_EXPENSES.variable.forEach(item => {
+        subtotalVariable += item.amount;
+        html += generateRow(item);
+    });
+    html += generateRow({ name: 'SUBTOTAL (CUSTOS VARIÁVEIS)', amount: subtotalVariable }, true);
+
+    // 3. TOTAL GERAL
+    html += `
+        <tr style="background: linear-gradient(90deg, rgba(30,41,59,0.9), rgba(15,23,42,0.9)); border-top: 2px solid var(--border-color);">
+            <th style="font-weight: 700; color: var(--text-primary);">TOTAL OPERACIONAL (FIXO + VARIÁVEL)</th>
+            <th style="text-align: right; color: var(--color-purple); font-weight: 700;">${formatCurrency(totalExpenses)}</th>
+            <th style="text-align: right; color: var(--color-cyan); font-weight: 700;">${formatCurrency(totalExpenses / avgMonthlyGuests)}</th>
+            <th style="text-align: right; color: var(--color-green); font-weight: 700;">${formatCurrency(totalExpenses / avgMonthlyNights)}</th>
+            <th style="text-align: right; color: var(--text-secondary); font-weight: 700;">${formatCurrency(totalExpenses / avgMonthlyBookings)}</th>
+            <th style="text-align: center; font-weight: 700;">100%</th>
+        </tr>
+    `;
+
+    tbody.innerHTML = html;
+
     // Atualizar os KPIs do topo da aba de Custos
+    const totalCpg = totalExpenses / avgMonthlyGuests;
     const kpiTotalGuest = document.getElementById('kpi-cost-total-guest');
     if (kpiTotalGuest) kpiTotalGuest.innerText = formatCurrency(totalCpg);
 }

@@ -554,25 +554,55 @@
                         </h2>
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
-                        Visão analítica de cada despesa do DRE dividida pelo volume de Hóspedes (CPG), Diárias (CPOR) e Reservas (CPR).
+                        Visão analítica de cada despesa do DRE dividida pelo volume de Hóspedes (CPG), Diárias (CPOR) e Reservas (CPR). Valores calculados utilizando a base média extraída de Jan-Mai/2026.
                     </p>
+
+                    <!-- Painel de Variáveis de Cálculo -->
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <div style="flex: 1; background: rgba(30, 41, 59, 0.5); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(59, 130, 246, 0.1); color: var(--color-blue); display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="users"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Média Hóspedes / Mês</div>
+                                <div id="calc-guests" style="font-size: 1.25rem; font-weight: 700; color: #fff;">0</div>
+                            </div>
+                        </div>
+                        <div style="flex: 1; background: rgba(30, 41, 59, 0.5); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); color: var(--color-green); display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="moon"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Média Diárias / Mês</div>
+                                <div id="calc-nights" style="font-size: 1.25rem; font-weight: 700; color: #fff;">0</div>
+                            </div>
+                        </div>
+                        <div style="flex: 1; background: rgba(30, 41, 59, 0.5); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 158, 11, 0.1); color: var(--color-yellow); display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="calendar-check"></i>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Média Reservas / Mês</div>
+                                <div id="calc-bookings" style="font-size: 1.25rem; font-weight: 700; color: #fff;">0</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Categoria da Despesa</th>
-                                    <th style="text-align: right;">Custo Total (R$)</th>
+                                    <th style="text-align: right;">Custo Total Mês (R$)</th>
                                     <th style="text-align: right;">Por Hóspede (CPG)</th>
                                     <th style="text-align: right;">Por Diária (CPOR)</th>
                                     <th style="text-align: right;">Por Reserva (CPR)</th>
-                                    <th style="text-align: center;">% do Custo Total</th>
+                                    <th style="text-align: center;">% do Custo Mês</th>
                                 </tr>
                             </thead>
                             <tbody id="cost-breakdown-tbody">
                                 <!-- Injected dynamically via app.js -->
                             </tbody>
-                            <tfoot id="cost-breakdown-tfoot" style="font-weight: 700; background: rgba(255,255,255,0.02);">
-                            </tfoot>
                         </table>
                     </div>
                 </div>
