@@ -155,7 +155,6 @@ const DRE_REVENUES = [
     { category: 'Consumos do Bar', value26: 12778.84, value25: 15868.15 }
 ];
 
-const DRE_EXPENSES = [
 // CUSTOS FIXOS (Média Financeira de 2026)
 let DRE_EXPENSES = {
     fixed: [
