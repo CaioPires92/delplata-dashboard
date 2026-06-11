@@ -233,4 +233,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // 6. Evolução de Canais de Venda (Stacked Bar)
+    new Chart(document.getElementById('channelsChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Booking.com',
+                    data: [243, 385, 568, 520],
+                    backgroundColor: '#003580', // Booking blue
+                    borderRadius: 4
+                },
+                {
+                    label: 'WhatsApp',
+                    data: [222, 233, 295, 146],
+                    backgroundColor: '#25D366', // WhatsApp green
+                    borderRadius: 4
+                },
+                {
+                    label: 'Balcão / Telefone',
+                    data: [81, 71, 77, 57],
+                    backgroundColor: '#f59e0b', // amber
+                    borderRadius: 4
+                },
+                {
+                    label: 'Site / Expedia / Outros',
+                    data: [0, 6, 9, 86],
+                    backgroundColor: '#8b5cf6', // purple
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: { usePointStyle: true, boxWidth: 8 }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + context.raw + ' reservas';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { borderDash: [4, 4] }
+                }
+            }
+        }
+    });
 });
